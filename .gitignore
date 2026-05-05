@@ -1,0 +1,95 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Python
+venv/
+__pycache__/
+*.pyc
+.env
+# Python Extended
+*.pyo
+*.pyd
+env/
+.venv/
+pip-log.txt
+.coverage
+htmlcov/
+.mypy_cache/
+
+# Node Extended
+.npm
+
+# Local DB
+*.db
+*.sqlite3
+*.sqlite
+
+# OS
+Thumbs.db
+Desktop.ini
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+ENV/
+*.egg-info/
+.pytest_cache/
+
+# Node
+node_modules/
+dist/
+build/
+.vite/
+
+# Environment variables
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Debug and test files
+debug_*.py
+test_*.py
+check_*.py
+verify_*.py
+quick_*.py
+simple_*.py
+backfill_*.py
+*_debug.log
+*.logsqlite
+
+# Excel (Explicit)
+*.xlsx
+*.xls

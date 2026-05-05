@@ -1,0 +1,30 @@
+name: ETL Scheduler
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"   # 5 menit
+    - cron: "0 * * * *"     # tiap jam
+    - cron: "5 17 * * *"    # 00:05 WIB (UTC+7 = 17:05 UTC hari sebelumnya)
+  workflow_dispatch:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger 5m ETL
+        if: github.event.schedule == '*/5 * * * *' || github.event_name == 'workflow_dispatch'
+        run: |
+          curl -sS -X POST "${{ secrets.ETL_BASE_URL }}/internal/etl/5m" \
+            -H "x-etl-secret: ${{ secrets.ETL_SECRET }}" || exit 1
+
+      - name: Trigger 1h ETL
+        if: github.event.schedule == '0 * * * *' || github.event_name == 'workflow_dispatch'
+        run: |
+          curl -sS -X POST "${{ secrets.ETL_BASE_URL }}/internal/etl/1h" \
+            -H "x-etl-secret: ${{ secrets.ETL_SECRET }}" || exit 1
+
+      - name: Trigger Daily Snapshot
+        if: github.event.schedule == '5 17 * * *' || github.event_name == 'workflow_dispatch'
+        run: |
+          curl -sS -X POST "${{ secrets.ETL_BASE_URL }}/internal/snapshot/daily" \
+            -H "x-etl-secret: ${{ secrets.ETL_SECRET }}" || exit 1
