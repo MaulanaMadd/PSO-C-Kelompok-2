@@ -23,7 +23,7 @@ def ingest_history():
         
     engine = create_engine(db_url)
     
-    files = ["data/potline_1_26.xlsx", "data/potline_3_26.xlsx"]
+    files = ["../data/potline_1_26.xlsx", "../data/potline_3_26.xlsx"]
     data_frames = []
     
     # 1. Read all data first to find global max date

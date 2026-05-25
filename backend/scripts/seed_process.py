@@ -1,11 +1,16 @@
 import os
+import sys
+from pathlib import Path
 import pandas as pd
 from sqlalchemy import create_engine, text
 from dotenv import load_dotenv
-from run_predictions import run_daily_predictions
 
-# Load environment variables
-load_dotenv()
+SCRIPT_DIR = Path(__file__).resolve().parent
+PROJECT_ROOT = SCRIPT_DIR.parent
+load_dotenv(dotenv_path=PROJECT_ROOT / ".env")
+sys.path.insert(0, str(PROJECT_ROOT))
+
+from run_predictions import run_daily_predictions
 
 SQL_STG_TO_RAW = """
 -- 1) Upsert dim_pot dari STG

@@ -1,10 +1,10 @@
-
 -- =========================================================
 -- SCHEMAS
 -- =========================================================
 create schema if not exists stg;
 create schema if not exists raw;
 create schema if not exists mart;
+create schema if not exists ml;
 
 -- =========================================================
 -- PUBLIC TABLES (optional)
@@ -97,6 +97,13 @@ create table if not exists raw.pot_daily (
   primary key (date, pot_id)
 );
 
+create table if not exists raw.dim_pot (
+  pot_id int primary key,
+  potnum text not null,
+  potline_id int,
+  updated_at timestamptz not null default now()
+);
+
 create index if not exists idx_raw_pot_daily_pot_date
   on raw.pot_daily(pot_id, date desc);
 
@@ -134,8 +141,8 @@ parsed as (
     tgl_txt::date as date,
     case when pot_txt ~ '^\\d+$' then pot_txt::int end as pot_id,
     case
-      when pot_txt ~ '^\\d+$' and pot_txt::int between 110 and 285 then 1
-      when pot_txt ~ '^\\d+$' and pot_txt::int between 510 and 685 then 3
+      when pot_txt ~ '^\\d+$' and pot_txt::int between 101 and 285 then 1
+      when pot_txt ~ '^\\d+$' and pot_txt::int between 501 and 685 then 3
       else null
     end as potline_id,
 
@@ -356,26 +363,22 @@ create index if not exists idx_fact_pot_daily_potline
   on mart.fact_pot_daily(potline_id);
 
 
+-- Latest snapshot table used by API for quick lookups (latest row per pot)
+drop table if exists mart.pot_latest_snapshot;
+
+create table if not exists mart.pot_latest_snapshot (
+  pot_id int primary key,
+  potline_id int,
+  date date,
+  ce numeric,
+  status int not null default 1,
+  updated_at timestamptz not null default now()
+);
+
+-- Create mart.pot_params_daily to mirror raw.pot_daily structure for easier ETL
 drop table if exists mart.pot_params_daily;
 
-create table mart.pot_params_daily (
-  date        date not null,
-  pot_id      int  not null,
-  potline_id  int,
-
-  ce          numeric,
-  bt          numeric,
-  m           numeric,
-  volt        numeric,   -- mapped from ov/avv
-  ae          numeric,   -- mapped from aef
-  noise       numeric,
-  age_day     int,
-
-  source      text,
-  ingested_at timestamptz not null default now(),
-
-  primary key (date, pot_id)
-);
+create table if not exists mart.pot_params_daily (like raw.pot_daily including all);
 
 create index if not exists idx_pot_params_daily_pot_date
   on mart.pot_params_daily(pot_id, date desc);
@@ -393,7 +396,40 @@ create table if not exists mart.ce_predicted_daily (
   yhat_hi numeric,
   is_offline_input boolean,
   created_at timestamptz default now(),
-  primary key (pot_id, pred_date)
+  primary key (pot_id, pred_date, model_version)
+);
+
+create table if not exists ml.prediction_logs (
+  run_id uuid primary key,
+  run_timestamp timestamptz not null default now(),
+  model_name text,
+  model_version text,
+  pots_predicted int,
+  execution_time_sec numeric,
+  avg_prediction numeric,
+  min_prediction numeric,
+  max_prediction numeric,
+  std_prediction numeric,
+  status text,
+  warnings jsonb,
+  error_message text
+);
+
+create table if not exists ml.model_registry (
+  model_name text not null,
+  model_version text not null,
+  model_type text,
+  file_path text,
+  trained_at timestamptz,
+  trained_by text,
+  training_metrics jsonb,
+  training_data_period jsonb,
+  feature_count int,
+  feature_list text[],
+  status text,
+  notes text,
+  created_at timestamptz not null default now(),
+  primary key (model_name, model_version)
 );
 
 -- =========================================================
@@ -404,24 +440,8 @@ begin;
 -- A) pot_params_daily (Dashboard Details)
 truncate table mart.pot_params_daily;
 
-insert into mart.pot_params_daily (
-  date, pot_id, potline_id,
-  ce, bt, m, volt, ae, noise, age_day,
-  source, ingested_at
-)
-select
-  d.date,
-  d.pot_id,
-  d.potline_id,
-  d.ce,
-  d.bt,
-  d.m,
-  d.ov as volt,   -- Note: using 'ov' as volt. Or 'avv'? Usually OV is Operating Voltage.
-  d.aef as ae,
-  d.noise,
-  d.age_day,
-  d.source,
-  d.ingested_at
+insert into mart.pot_params_daily
+select *
 from raw.pot_daily d
 where d.pot_id is not null
   and d.date is not null;

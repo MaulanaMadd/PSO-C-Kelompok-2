@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from sqlalchemy import create_engine, text
 from dotenv import load_dotenv
 
@@ -10,8 +11,9 @@ def apply_schema():
     if db_url.startswith("postgres://"): db_url = db_url.replace("postgres://", "postgresql://", 1)
     engine = create_engine(db_url)
     
-    # Read schema file
-    with open("backend/schema.sql", "r") as f:
+    # Read schema file from backend root
+    schema_path = Path(__file__).resolve().parent.parent / 'schema.sql'
+    with open(schema_path, "r") as f:
         sql = f.read()
         
     # Execute

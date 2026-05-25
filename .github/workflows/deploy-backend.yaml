@@ -1,0 +1,48 @@
+name: Build & Deploy to Cloud Run -- Backend
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'backend/**'
+
+env:
+  SERVICE_NAME: optina-backend
+  REGION: asia-southeast2
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker
+        run: |
+          gcloud auth configure-docker asia-southeast2-docker.pkg.dev
+
+      - name: Build & Push
+        run: |
+          IMAGE="asia-southeast2-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.ARTIFACT_REPO }}/backend"
+
+          docker build -t $IMAGE:$GITHUB_SHA ./backend
+          docker push $IMAGE:$GITHUB_SHA
+
+      - name: Deploy
+        run: |
+          IMAGE="asia-southeast2-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.ARTIFACT_REPO }}/backend"
+
+          gcloud run deploy $SERVICE_NAME \
+            --image=$IMAGE:$GITHUB_SHA \
+            --platform=managed \
+            --region=$REGION \
+            --allow-unauthenticated \
+            --port=8080 \
+            --memory=512Mi \
+            --set-env-vars="DATABASE_URL=${{ secrets.DATABASE_URL }}"
