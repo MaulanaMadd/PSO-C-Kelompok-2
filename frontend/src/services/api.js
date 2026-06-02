@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'https://project-optimasi-operasional-reduksi-pt-inalum-production.up.railway.app/api/v1',
+  baseURL: import.meta.env.VITE_API_BASE_URL,
   headers: {
     // "Content-Type" is not set globally so that axios can set it automatically 
     // for FormData (multipart/form-data) or JSON (application/json)

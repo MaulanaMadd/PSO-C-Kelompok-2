@@ -38,7 +38,7 @@ jobs:
         run: |
           IMAGE="asia-southeast2-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.ARTIFACT_REPO }}/backend"
 
-          gcloud run deploy $SERVICE_NAME \
+          gcloud run deploy optina-backend-staging \
             --image=$IMAGE:$GITHUB_SHA \
             --platform=managed \
             --region=$REGION \
