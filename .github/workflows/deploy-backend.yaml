@@ -2,12 +2,13 @@ name: Build & Deploy to Cloud Run -- Backend
 
 on:
   push:
-    branches: [main]
+    branches:
+      - develop
+      - main
     paths:
       - 'backend/**'
 
 env:
-  SERVICE_NAME: optina-backend
   REGION: asia-southeast2
 
 jobs:
@@ -27,22 +28,35 @@ jobs:
         run: |
           gcloud auth configure-docker asia-southeast2-docker.pkg.dev
 
+      - name: Set Environment
+        run: |
+          if [[ "${GITHUB_REF}" == "refs/heads/develop" ]]; then
+            echo "SERVICE_NAME=optina-backend-staging" >> $GITHUB_ENV
+            echo "DATABASE_URL=${{ secrets.DATABASE_URL_STAGING }}" >> $GITHUB_ENV
+          else
+            echo "SERVICE_NAME=optina-backend" >> $GITHUB_ENV
+            echo "DATABASE_URL=${{ secrets.DATABASE_URL_PROD }}" >> $GITHUB_ENV
+          fi
+
       - name: Build & Push
         run: |
           IMAGE="asia-southeast2-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.ARTIFACT_REPO }}/backend"
 
-          docker build -t $IMAGE:$GITHUB_SHA ./backend
+          docker build \
+            -t $IMAGE:$GITHUB_SHA \
+            ./backend
+
           docker push $IMAGE:$GITHUB_SHA
 
       - name: Deploy
         run: |
           IMAGE="asia-southeast2-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.ARTIFACT_REPO }}/backend"
 
-          gcloud run deploy optina-backend-staging \
+          gcloud run deploy $SERVICE_NAME \
             --image=$IMAGE:$GITHUB_SHA \
             --platform=managed \
             --region=$REGION \
             --allow-unauthenticated \
             --port=8080 \
             --memory=512Mi \
-            --set-env-vars="DATABASE_URL=${{ secrets.DATABASE_URL }}"
+            --set-env-vars="DATABASE_URL=$DATABASE_URL"
