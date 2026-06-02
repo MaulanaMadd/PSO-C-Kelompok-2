@@ -6,6 +6,8 @@ env:
 on:
   push:
     branches: [main]
+    paths:
+      - 'frontend/**'
 
 jobs:
   deploy:
