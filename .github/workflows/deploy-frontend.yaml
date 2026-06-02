@@ -33,7 +33,7 @@ jobs:
         run: |
           IMAGE="asia-southeast2-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.ARTIFACT_REPO }}/pso"
 
-          gcloud run deploy my-app-service \
+          gcloud run deploy optina-frontend \
             --image=$IMAGE:$GITHUB_SHA \
             --platform=managed \
             --region=${{ secrets.GCP_REGION }} \
