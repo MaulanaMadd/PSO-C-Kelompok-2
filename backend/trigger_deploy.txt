@@ -1,5 +1,2 @@
-<<<<<<< HEAD
-ini coba trigger di develop
-=======
 coba trigger lagi
->>>>>>> f4cca2b1ed391719a1251e1b8a95353fb26b801c
+trigger lagi

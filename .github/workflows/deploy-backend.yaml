@@ -37,7 +37,15 @@ jobs:
             echo "SERVICE_NAME=optina-backend" >> $GITHUB_ENV
             echo "DATABASE_URL=${{ secrets.DATABASE_URL_PROD }}" >> $GITHUB_ENV
           fi
-
+      - name: Debug Environment
+        run: |
+          echo "SERVICE_NAME=$SERVICE_NAME"
+            if [ -z "$DATABASE_URL" ]; then
+              echo "DATABASE_URL IS EMPTY"
+            else
+              echo "DATABASE_URL EXISTS"
+            fi
+      
       - name: Build & Push
         run: |
           IMAGE="asia-southeast2-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.ARTIFACT_REPO }}/backend"
