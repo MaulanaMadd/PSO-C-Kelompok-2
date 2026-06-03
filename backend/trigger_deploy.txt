@@ -6,3 +6,5 @@ trigger
 coba trigger lagi
 
 kelupaan
+
+coba trigger

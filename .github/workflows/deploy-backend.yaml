@@ -56,6 +56,12 @@ jobs:
           echo "PROJECT ID LENGTH: ${#PROJECT_ID}"
         env:
           PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+
+      - name: Test Database Secret
+        run: |
+          echo "DATABASE_URL LENGTH: ${#DATABASE_URL}"
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
       
       - name: Debug Secrets
         run: |
