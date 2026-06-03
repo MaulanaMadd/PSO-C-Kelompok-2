@@ -38,6 +38,16 @@ jobs:
             echo "DATABASE_URL=${{ secrets.DATABASE_URL_PROD }}" >> $GITHUB_ENV
           fi
 
+      - name: Compare Secret Lengths
+        run: |
+          echo "DATABASE_URL=${#DB}"
+          echo "DATABASE_URL_PROD=${#PROD}"
+          echo "DATABASE_URL_STAGING=${#STAGING}"
+        env:
+          DB: ${{ secrets.DATABASE_URL }}
+          PROD: ${{ secrets.DATABASE_URL_PROD }}
+          STAGING: ${{ secrets.DATABASE_URL_STAGING }}
+      
       - name: Debug Selected DB
         run: |
           echo "DB LENGTH=${#DATABASE_URL}"
