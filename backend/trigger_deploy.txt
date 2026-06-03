@@ -4,3 +4,5 @@ lagi
 trigger
 
 coba trigger lagi
+
+kelupaan

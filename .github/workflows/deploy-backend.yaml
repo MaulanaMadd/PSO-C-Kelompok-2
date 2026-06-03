@@ -50,11 +50,12 @@ jobs:
           echo "EVENT=$GITHUB_EVENT_NAME"
           echo "REPOSITORY=$GITHUB_REPOSITORY"
           echo "REF=$GITHUB_REF"
-      - name: Debug Context
+      
+      - name: Test Existing Secret
         run: |
-          echo "EVENT=$GITHUB_EVENT_NAME"
-          echo "REPOSITORY=$GITHUB_REPOSITORY"
-          echo "REF=$GITHUB_REF"
+          echo "PROJECT ID LENGTH: ${#PROJECT_ID}"
+        env:
+          PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
       
       - name: Debug Secrets
         run: |
