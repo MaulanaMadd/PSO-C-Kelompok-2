@@ -24,14 +24,6 @@ jobs:
 
       - uses: google-github-actions/setup-gcloud@v2
 
-      - name: Debug Secret Length
-        run: |
-          echo "PROD LENGTH: ${#DATABASE_URL_PROD}"
-          echo "STAGING LENGTH: ${#DATABASE_URL_STAGING}"
-        env:
-          DATABASE_URL_PROD: ${{ secrets.DATABASE_URL_PROD }}
-          DATABASE_URL_STAGING: ${{ secrets.DATABASE_URL_STAGING }}
-
       - name: Configure Docker
         run: |
           gcloud auth configure-docker asia-southeast2-docker.pkg.dev
@@ -40,54 +32,17 @@ jobs:
         run: |
           if [[ "${GITHUB_REF}" == "refs/heads/develop" ]]; then
             echo "SERVICE_NAME=optina-backend-staging" >> $GITHUB_ENV
-            echo "DATABASE_URL=${{ secrets.DATABASE_URL_STAGING }}" >> $GITHUB_ENV
           else
             echo "SERVICE_NAME=optina-backend" >> $GITHUB_ENV
-            echo "DATABASE_URL=${{ secrets.DATABASE_URL_PROD }}" >> $GITHUB_ENV
-          fi
-      - name: Debug Context
-        run: |
-          echo "EVENT=$GITHUB_EVENT_NAME"
-          echo "REPOSITORY=$GITHUB_REPOSITORY"
-          echo "REF=$GITHUB_REF"
-      
-      - name: Test Existing Secret
-        run: |
-          echo "PROJECT ID LENGTH: ${#PROJECT_ID}"
-        env:
-          PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-
-      - name: Test Database Secret
-        run: |
-          echo "DATABASE_URL LENGTH: ${#DATABASE_URL}"
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-      
-      - name: Debug Secrets
-        run: |
-          echo "BRANCH=${GITHUB_REF}"
-
-          if [[ -n "${{ secrets.DATABASE_URL_PROD }}" ]]; then
-            echo "PROD SECRET EXISTS"
-          else
-            echo "PROD SECRET EMPTY"
-          fi
-
-          if [[ -n "${{ secrets.DATABASE_URL_STAGING }}" ]]; then
-            echo "STAGING SECRET EXISTS"
-          else
-            echo "STAGING SECRET EMPTY"
           fi
 
       - name: Debug Environment
         run: |
           echo "SERVICE_NAME=$SERVICE_NAME"
-            if [ -z "$DATABASE_URL" ]; then
-              echo "DATABASE_URL IS EMPTY"
-            else
-              echo "DATABASE_URL EXISTS"
-            fi
-      
+          echo "DATABASE_URL LENGTH: ${#DATABASE_URL}"
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
       - name: Build & Push
         run: |
           IMAGE="asia-southeast2-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.ARTIFACT_REPO }}/backend"
@@ -99,6 +54,8 @@ jobs:
           docker push $IMAGE:$GITHUB_SHA
 
       - name: Deploy
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: |
           IMAGE="asia-southeast2-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.ARTIFACT_REPO }}/backend"
 
