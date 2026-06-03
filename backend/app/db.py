@@ -10,15 +10,6 @@ load_dotenv(dotenv_path=env_path)
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 
-print("=" * 50)
-print("DATABASE_URL EXISTS:", DATABASE_URL is not None)
-
-if DATABASE_URL:
-    print("DATABASE_URL LENGTH:", len(DATABASE_URL))
-    print("DATABASE_URL HOST:", DATABASE_URL.split("@")[-1])
-
-print("=" * 50)
-
 # Setup logging
 logging.basicConfig(filename='backend_debug.log', level=logging.INFO, 
                     format='%(asctime)s %(levelname)s:%(message)s')

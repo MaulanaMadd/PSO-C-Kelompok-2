@@ -10,3 +10,5 @@ kelupaan
 coba trigger
 
 lagi!
+
+trigger

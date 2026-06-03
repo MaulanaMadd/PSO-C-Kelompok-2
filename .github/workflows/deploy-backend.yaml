@@ -32,16 +32,11 @@ jobs:
         run: |
           if [[ "${GITHUB_REF}" == "refs/heads/develop" ]]; then
             echo "SERVICE_NAME=optina-backend-staging" >> $GITHUB_ENV
+            echo "DATABASE_URL=${{ secrets.DATABASE_URL_STAGING }}" >> $GITHUB_ENV
           else
             echo "SERVICE_NAME=optina-backend" >> $GITHUB_ENV
+            echo "DATABASE_URL=${{ secrets.DATABASE_URL_PROD }}" >> $GITHUB_ENV
           fi
-
-      - name: Debug Environment
-        run: |
-          echo "SERVICE_NAME=$SERVICE_NAME"
-          echo "DATABASE_URL LENGTH: ${#DATABASE_URL}"
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
       - name: Build & Push
         run: |
@@ -54,8 +49,6 @@ jobs:
           docker push $IMAGE:$GITHUB_SHA
 
       - name: Deploy
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: |
           IMAGE="asia-southeast2-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.ARTIFACT_REPO }}/backend"
 
