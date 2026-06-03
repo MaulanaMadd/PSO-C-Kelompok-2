@@ -37,13 +37,22 @@ app.add_middleware(
 
 @app.on_event("startup")
 async def _startup():
-    from . import db
-    pool = await db.get_pool()
-    async with pool.acquire() as conn:
-        try:
-            await conn.execute("ALTER TABLE public.users ADD COLUMN IF NOT EXISTS phone text;")
-        except Exception as e:
-            print(f"Startup migration warning: {e}")
+    try:
+        from . import db
+        pool = await db.get_pool()
+
+        async with pool.acquire() as conn:
+            try:
+                await conn.execute(
+                    "ALTER TABLE public.users ADD COLUMN IF NOT EXISTS phone text;"
+                )
+            except Exception as e:
+                print(f"Startup migration warning: {e}")
+
+        print("Database connected successfully")
+
+    except Exception as e:
+        print(f"Database startup error: {repr(e)}")
 
 @app.on_event("shutdown")
 async def _shutdown():
