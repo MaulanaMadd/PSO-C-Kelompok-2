@@ -37,6 +37,22 @@ jobs:
             echo "SERVICE_NAME=optina-backend" >> $GITHUB_ENV
             echo "DATABASE_URL=${{ secrets.DATABASE_URL_PROD }}" >> $GITHUB_ENV
           fi
+      - name: Debug Secrets
+        run: |
+          echo "BRANCH=${GITHUB_REF}"
+
+          if [[ -n "${{ secrets.DATABASE_URL_PROD }}" ]]; then
+            echo "PROD SECRET EXISTS"
+          else
+            echo "PROD SECRET EMPTY"
+          fi
+
+          if [[ -n "${{ secrets.DATABASE_URL_STAGING }}" ]]; then
+            echo "STAGING SECRET EXISTS"
+          else
+            echo "STAGING SECRET EMPTY"
+          fi
+
       - name: Debug Environment
         run: |
           echo "SERVICE_NAME=$SERVICE_NAME"
