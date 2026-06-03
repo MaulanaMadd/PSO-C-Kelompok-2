@@ -24,6 +24,14 @@ jobs:
 
       - uses: google-github-actions/setup-gcloud@v2
 
+      - name: Debug Secret Length
+        run: |
+          echo "PROD LENGTH: ${#DATABASE_URL_PROD}"
+          echo "STAGING LENGTH: ${#DATABASE_URL_STAGING}"
+        env:
+          DATABASE_URL_PROD: ${{ secrets.DATABASE_URL_PROD }}
+          DATABASE_URL_STAGING: ${{ secrets.DATABASE_URL_STAGING }}
+
       - name: Configure Docker
         run: |
           gcloud auth configure-docker asia-southeast2-docker.pkg.dev
