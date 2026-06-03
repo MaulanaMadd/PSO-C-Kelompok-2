@@ -10,6 +10,8 @@ load_dotenv(dotenv_path=env_path)
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 
+print("DATABASE_URL HOST:", DATABASE_URL.split("@")[-1])
+
 # Setup logging
 logging.basicConfig(filename='backend_debug.log', level=logging.INFO, 
                     format='%(asctime)s %(levelname)s:%(message)s')
