@@ -38,7 +38,6 @@ jobs:
 
       - name: Run backend tests
         run: |
-          cd backend
           python -m pytest backend -q
 
   deploy:
