@@ -39,7 +39,7 @@ jobs:
       - name: Run backend tests
         run: |
           cd backend
-          python -m pytest tests -q
+          python -m pytest backend -q
 
   deploy:
     needs: test
