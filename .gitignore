@@ -81,7 +81,6 @@ Thumbs.db
 
 # Debug and test files
 debug_*.py
-test_*.py
 check_*.py
 verify_*.py
 quick_*.py
