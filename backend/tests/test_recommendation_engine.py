@@ -10,14 +10,9 @@ from app.core.recommendation_engine import RecommendationEngine
 # AE RULES
 # =========================
 
+
 def test_r1_recommendation():
-    row = {
-        "pot_id": 101,
-        "oa": 10,
-        "aef": 0.7,
-        "ae_dur": 250,
-        "bt": 950
-    }
+    row = {"pot_id": 101, "oa": 10, "aef": 0.7, "ae_dur": 250, "bt": 950}
 
     recs = RecommendationEngine.generate_recommendations(row)
 
@@ -27,12 +22,7 @@ def test_r1_recommendation():
 
 
 def test_r2_recommendation():
-    row = {
-        "pot_id": 101,
-        "oa": 15,
-        "aef": 0.7,
-        "bt": 930
-    }
+    row = {"pot_id": 101, "oa": 15, "aef": 0.7, "bt": 930}
 
     recs = RecommendationEngine.generate_recommendations(row)
 
@@ -42,11 +32,7 @@ def test_r2_recommendation():
 
 
 def test_r3_recommendation():
-    row = {
-        "pot_id": 101,
-        "aef": 0.7,
-        "feed_pct": 80
-    }
+    row = {"pot_id": 101, "aef": 0.7, "feed_pct": 80}
 
     recs = RecommendationEngine.generate_recommendations(row)
 
@@ -56,11 +42,7 @@ def test_r3_recommendation():
 
 
 def test_r4_recommendation():
-    row = {
-        "pot_id": 101,
-        "aef": 0.7,
-        "noise": 150
-    }
+    row = {"pot_id": 101, "aef": 0.7, "noise": 150}
 
     recs = RecommendationEngine.generate_recommendations(row)
 
@@ -73,11 +55,9 @@ def test_r4_recommendation():
 # THERMAL RULES
 # =========================
 
+
 def test_r5_recommendation():
-    row = {
-        "pot_id": 101,
-        "bt": 930
-    }
+    row = {"pot_id": 101, "bt": 930}
 
     recs = RecommendationEngine.generate_recommendations(row)
 
@@ -87,10 +67,7 @@ def test_r5_recommendation():
 
 
 def test_r6_recommendation():
-    row = {
-        "pot_id": 101,
-        "bt": 980
-    }
+    row = {"pot_id": 101, "bt": 980}
 
     recs = RecommendationEngine.generate_recommendations(row)
 
@@ -103,11 +80,9 @@ def test_r6_recommendation():
 # STABILITY RULES
 # =========================
 
+
 def test_r7_recommendation():
-    row = {
-        "pot_id": 101,
-        "noise": 150
-    }
+    row = {"pot_id": 101, "noise": 150}
 
     recs = RecommendationEngine.generate_recommendations(row)
 
@@ -120,11 +95,9 @@ def test_r7_recommendation():
 # ELECTRICAL RULES
 # =========================
 
+
 def test_r8_recommendation():
-    row = {
-        "pot_id": 101,
-        "avv": 4.8
-    }
+    row = {"pot_id": 101, "avv": 4.8}
 
     recs = RecommendationEngine.generate_recommendations(row)
 
@@ -134,10 +107,7 @@ def test_r8_recommendation():
 
 
 def test_r9_recommendation():
-    row = {
-        "pot_id": 101,
-        "pl_current": 210
-    }
+    row = {"pot_id": 101, "pl_current": 210}
 
     recs = RecommendationEngine.generate_recommendations(row)
 
@@ -147,11 +117,7 @@ def test_r9_recommendation():
 
 
 def test_r10_recommendation():
-    row = {
-        "pot_id": 101,
-        "osp": 5.5,
-        "psp": 4.0
-    }
+    row = {"pot_id": 101, "osp": 5.5, "psp": 4.0}
 
     recs = RecommendationEngine.generate_recommendations(row)
 
@@ -164,11 +130,9 @@ def test_r10_recommendation():
 # CHEMISTRY RULES
 # =========================
 
+
 def test_r11_recommendation():
-    row = {
-        "pot_id": 101,
-        "sa": 15
-    }
+    row = {"pot_id": 101, "sa": 15}
 
     recs = RecommendationEngine.generate_recommendations(row)
 
@@ -178,10 +142,7 @@ def test_r11_recommendation():
 
 
 def test_r12_recommendation():
-    row = {
-        "pot_id": 101,
-        "caf2": 8
-    }
+    row = {"pot_id": 101, "caf2": 8}
 
     recs = RecommendationEngine.generate_recommendations(row)
 
@@ -191,20 +152,11 @@ def test_r12_recommendation():
 
 
 def test_r13_recommendation():
-    row = {
-        "pot_id": 101
-    }
+    row = {"pot_id": 101}
 
-    history = [
-        {"alf3": 0},
-        {"alf3": 0},
-        {"alf3": 0}
-    ]
+    history = [{"alf3": 0}, {"alf3": 0}, {"alf3": 0}]
 
-    recs = RecommendationEngine.generate_recommendations(
-        row,
-        history
-    )
+    recs = RecommendationEngine.generate_recommendations(row, history)
 
     codes = [r["code"] for r in recs]
 
@@ -212,20 +164,11 @@ def test_r13_recommendation():
 
 
 def test_r14_recommendation():
-    row = {
-        "pot_id": 101
-    }
+    row = {"pot_id": 101}
 
-    history = [
-        {"alf3": 100},
-        {"alf3": 100},
-        {"alf3": 100}
-    ]
+    history = [{"alf3": 100}, {"alf3": 100}, {"alf3": 100}]
 
-    recs = RecommendationEngine.generate_recommendations(
-        row,
-        history
-    )
+    recs = RecommendationEngine.generate_recommendations(row, history)
 
     codes = [r["code"] for r in recs]
 
@@ -236,12 +179,9 @@ def test_r14_recommendation():
 # FEEDING RULES
 # =========================
 
+
 def test_r15_recommendation():
-    row = {
-        "pot_id": 101,
-        "feed_pct": 120,
-        "bt": 930
-    }
+    row = {"pot_id": 101, "feed_pct": 120, "bt": 930}
 
     recs = RecommendationEngine.generate_recommendations(row)
 
@@ -254,11 +194,9 @@ def test_r15_recommendation():
 # PRIORITY RULES
 # =========================
 
+
 def test_r16_priority():
-    row = {
-        "pot_id": 101,
-        "m": 22
-    }
+    row = {"pot_id": 101, "m": 22}
 
     recs = RecommendationEngine.generate_recommendations(row)
 
