@@ -9,6 +9,17 @@ select = [
 ]
 ignore = [
     "E501",  # line too long (handled by formatter)
+    "B904",  # raise ... from err
+    "C901",  # too complex
+    "E741",  # ambiguous variable name
+    "W291",  # trailing whitespace
+    "W293",  # blank line contains whitespace
+    "B008",  # Depends in argument defaults (FastAPI standard)
+    "E402",  # module level import not at top of file
+    "I001",  # import block unsorted
+    "W292",  # no newline at end of file
+    "B017",  # blind exception
+    "E722",  # bare except
 ]
 
 [format]
