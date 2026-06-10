@@ -14,4 +14,5 @@ pytest==7.4.2
 pytest-asyncio==0.23.8
 pytest-cov==4.1.0
 coverage==7.4.0
-httpxruff==0.4.8
+httpx
+ruff==0.4.8
