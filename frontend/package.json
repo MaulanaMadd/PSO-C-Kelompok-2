@@ -9,8 +9,11 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "start": "vite preview --host 0.0.0.0 --port 8080",
-    "test": "vitest",
-    "test:watch": "vitest --watch"
+    "test": "vitest --config vitest.config.js",
+    "test:watch": "vitest --watch --config vitest.config.js",
+    "test:run": "vitest run --config vitest.config.js",
+    "test:coverage": "vitest run --coverage --config vitest.config.js",
+    "test:ui": "vitest --ui --config vitest.config.js"
   },
   "dependencies": {
     "axios": "^1.13.2",
@@ -22,6 +25,7 @@
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.4.16",
     "@eslint/js": "^9.39.1",
     "@testing-library/jest-dom": "^6.0.0",
     "@testing-library/react": "^16.3.0",

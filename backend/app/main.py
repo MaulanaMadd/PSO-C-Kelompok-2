@@ -1,13 +1,12 @@
 import os
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .db import close_pool
 from .routers import auth as auth_router
+from .routers import dashboard, notifications, settings
 from .routers import etl as etl_router
-from .routers import dashboard
-from .routers import notifications
-from .routers import settings
 
 API_PREFIX = os.getenv("API_PREFIX", "/api/v1")
 CORS_ORIGINS = os.getenv("CORS_ORIGINS", "*")
@@ -22,9 +21,11 @@ app = FastAPI(
 )
 
 app.include_router(auth_router.router, prefix=f"{API_PREFIX}/auth")
-app.include_router(etl_router.router) # ETL routes are internal/custom
+app.include_router(etl_router.router)  # ETL routes are internal/custom
 app.include_router(dashboard.router, prefix=API_PREFIX)
-app.include_router(notifications.router, prefix=f"{API_PREFIX}/notifications", tags=["Notifications"])
+app.include_router(
+    notifications.router, prefix=f"{API_PREFIX}/notifications", tags=["Notifications"]
+)
 app.include_router(settings.router, prefix=f"{API_PREFIX}")
 
 app.add_middleware(
@@ -35,10 +36,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 @app.on_event("startup")
 async def _startup():
     try:
         from . import db
+
         pool = await db.get_pool()
 
         async with pool.acquire() as conn:
@@ -54,7 +57,7 @@ async def _startup():
     except Exception as e:
         print(f"Database startup error: {repr(e)}")
 
+
 @app.on_event("shutdown")
 async def _shutdown():
     await close_pool()
-

@@ -1,20 +1,25 @@
+import logging
 import os
+from pathlib import Path
+
 import asyncpg
 from dotenv import load_dotenv
-from pathlib import Path
-import logging
 
 # Explicitly load .env from the backend root directory
-env_path = Path(__file__).resolve().parent.parent / '.env'
+env_path = Path(__file__).resolve().parent.parent / ".env"
 load_dotenv(dotenv_path=env_path)
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 
 # Setup logging
-logging.basicConfig(filename='backend_debug.log', level=logging.INFO, 
-                    format='%(asctime)s %(levelname)s:%(message)s')
+logging.basicConfig(
+    filename="backend_debug.log",
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s:%(message)s",
+)
 
 _pool: asyncpg.Pool | None = None
+
 
 async def get_pool() -> asyncpg.Pool:
     global _pool
@@ -27,6 +32,7 @@ async def get_pool() -> asyncpg.Pool:
             logging.error(f"DB Connection failed: {e}")
             raise e
     return _pool
+
 
 async def close_pool():
     global _pool

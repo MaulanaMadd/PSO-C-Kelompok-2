@@ -1,7 +1,8 @@
-import os
 import logging
-from fastapi import APIRouter, Header, HTTPException, status, BackgroundTasks
-from fastapi.responses import JSONResponse
+import os
+
+from fastapi import APIRouter, BackgroundTasks, Header, HTTPException
+
 from app.db import get_pool
 
 router = APIRouter()
@@ -10,8 +11,9 @@ router = APIRouter()
 
 # --- SQL Queries (Dynamic Templates) ---
 
+
 def get_sql_upsert_5m(sim_ts: str) -> str:
-    # sim_ts should be a Safe String literal or bound parameter. 
+    # sim_ts should be a Safe String literal or bound parameter.
     # Here using f-string injection for simplicity with existing execution pattern.
     return f"""
 BEGIN;
@@ -67,6 +69,7 @@ WHERE ts_5m < '{sim_ts}'::timestamptz - interval '2 days'; -- Increased retentio
 COMMIT;
 """
 
+
 def get_sql_upsert_1h(sim_ts: str) -> str:
     return f"""
 BEGIN;
@@ -104,6 +107,7 @@ WHERE ts_1h < '{sim_ts}'::timestamptz - interval '7 days';
 
 COMMIT;
 """
+
 
 def get_sql_snapshot_daily(sim_date: str) -> str:
     # Daily Snapshot uses a specific DATE string
@@ -148,12 +152,14 @@ LEFT JOIN LATERAL (
 COMMIT;
 """
 
+
 # --- Helpers ---
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 from datetime import datetime, timedelta, timezone
+
 
 def get_simulated_now() -> datetime:
     """
@@ -162,32 +168,36 @@ def get_simulated_now() -> datetime:
     """
     # Define WIB timezone
     wib = timezone(timedelta(hours=7))
-    
+
     # Get current time in WIB
     wib_now = datetime.now(wib)
-    
+
     # Force Year: 2025, but keep Month/Day from current real time
     # This assumes the simulation runs parallel to real calendar days.
     # If today is Jan 15, this might crash if we try to set Month=1 (since simulation is Dec 2025).
-    # Checking user context: "2025-12-04" vs Real Date "Jan 15". 
+    # Checking user context: "2025-12-04" vs Real Date "Jan 15".
     # The gap is huge. Real date is Jan 2026. Simulation is Dec 2025.
     # Mapping logic: If we want "Today" to match "2025-12-04", and real date is Jan 15... that doesn't match.
     # User said "doest 06:55 is 13.55". That matches 7 hour timezone.
-    
+
     # REVERTED TO 2025-12-02 AS PER USER REQUEST
     # User wants "today in sim is 12-02".
-    
+
     sim_now = wib_now.replace(year=2025, month=12, day=2)
     return sim_now
+
 
 def verify_secret(x_etl_secret: str | None = Header(default=None)):
     env_secret = os.getenv("ETL_SECRET")
     if not env_secret:
         # If secret not configured in env, fail secure
-        raise HTTPException(status_code=500, detail="ETL_SECRET not configured on server")
-    
+        raise HTTPException(
+            status_code=500, detail="ETL_SECRET not configured on server"
+        )
+
     if x_etl_secret != env_secret:
         raise HTTPException(status_code=401, detail="Unauthorized")
+
 
 async def run_with_lock(lock_id: int, sql: str):
     """
@@ -199,10 +209,10 @@ async def run_with_lock(lock_id: int, sql: str):
         # Try to acquire lock
         # pg_try_advisory_lock returns primitive boolean in asyncpg
         locked = await conn.fetchval("SELECT pg_try_advisory_lock($1)", lock_id)
-        
+
         if not locked:
             raise HTTPException(status_code=409, detail="Job already running (locked)")
-        
+
         try:
             # We have the lock. Run the job.
             await conn.execute(sql)
@@ -214,37 +224,50 @@ async def run_with_lock(lock_id: int, sql: str):
             # Always unlock
             await conn.execute("SELECT pg_advisory_unlock($1)", lock_id)
 
+
 # --- Routes ---
 
+
 @router.post("/internal/etl/5m")
-async def etl_5m(background_tasks: BackgroundTasks, x_etl_secret: str | None = Header(default=None, alias="x-etl-secret")):
+async def etl_5m(
+    background_tasks: BackgroundTasks,
+    x_etl_secret: str | None = Header(default=None, alias="x-etl-secret"),
+):
     verify_secret(x_etl_secret)
     # PAUSED AS REQUESTED
     # sim_now = get_simulated_now()
     # sql = get_sql_upsert_5m(sim_now.isoformat())
-    
+
     # Run in background to prevent HTTP timeout
     # background_tasks.add_task(run_with_lock, 50005, sql)
     return {"status": "paused", "job": "etl_5m"}
 
+
 @router.post("/internal/etl/1h")
-async def etl_1h(background_tasks: BackgroundTasks, x_etl_secret: str | None = Header(default=None, alias="x-etl-secret")):
+async def etl_1h(
+    background_tasks: BackgroundTasks,
+    x_etl_secret: str | None = Header(default=None, alias="x-etl-secret"),
+):
     verify_secret(x_etl_secret)
     # PAUSED AS REQUESTED
     # sim_now = get_simulated_now()
     # sql = get_sql_upsert_1h(sim_now.isoformat())
-    
+
     # background_tasks.add_task(run_with_lock, 50001, sql)
     return {"status": "paused", "job": "etl_1h"}
 
+
 @router.post("/internal/snapshot/daily")
-async def etl_daily(background_tasks: BackgroundTasks, x_etl_secret: str | None = Header(default=None, alias="x-etl-secret")):
+async def etl_daily(
+    background_tasks: BackgroundTasks,
+    x_etl_secret: str | None = Header(default=None, alias="x-etl-secret"),
+):
     verify_secret(x_etl_secret)
     # PAUSED AS REQUESTED
     # sim_now = get_simulated_now()
     # # Daily snapshot usually runs at specific date.
-    # sim_date_str = sim_now.strftime("%Y-%m-%d") 
+    # sim_date_str = sim_now.strftime("%Y-%m-%d")
     # sql = get_sql_snapshot_daily(sim_date_str)
-    
+
     # background_tasks.add_task(run_with_lock, 50024, sql)
     return {"status": "paused", "job": "etl_daily"}

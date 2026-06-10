@@ -1,9 +1,9 @@
 import os
 import sys
 from pathlib import Path
-import pandas as pd
-from sqlalchemy import create_engine, text
+
 from dotenv import load_dotenv
+from sqlalchemy import create_engine, text
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 PROJECT_ROOT = SCRIPT_DIR.parent
@@ -368,38 +368,41 @@ cross join latest_global g;
 commit;
 """
 
+
 def seed_process():
     print("Starting ETL Process...")
-    
+
     db_url = os.getenv("DATABASE_URL")
     if not db_url:
         print("DATABASE_URL not found!")
         return
-        
+
     if db_url.startswith("postgres://"):
         db_url = db_url.replace("postgres://", "postgresql://", 1)
-        
+
     engine = create_engine(db_url)
-    
+
     # 1. STG -> RAW
     print("Running STG -> RAW Transformation...")
     with engine.begin() as conn:
         conn.execute(text(SQL_STG_TO_RAW))
-        
+
     # 2. RAW -> MART
     print("Running RAW -> MART Tranformation...")
     with engine.begin() as conn:
         conn.execute(text(SQL_RAW_TO_MART))
-        
+
     print("ETL Data Processing Complete.")
-    
+
     # 3. Predictions
     try:
         run_daily_predictions()
     except Exception as e:
         print(f"Prediction Error: {e}")
         import traceback
+
         traceback.print_exc()
+
 
 if __name__ == "__main__":
     seed_process()

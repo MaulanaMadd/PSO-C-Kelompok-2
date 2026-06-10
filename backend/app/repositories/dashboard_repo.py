@@ -1,7 +1,10 @@
 from datetime import datetime
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional
+
 from asyncpg import Pool
+
 from .base_repo import BaseRepo
+
 
 class DashboardRepo(BaseRepo):
     def __init__(self, pool: Pool):
@@ -52,7 +55,9 @@ class DashboardRepo(BaseRepo):
             rows = await conn.fetch(query, potline_id)
         return [dict(r) for r in rows]
 
-    async def get_layer_range(self, pot_id: int, start: datetime, end: datetime) -> List[Dict[str, Any]]:
+    async def get_layer_range(
+        self, pot_id: int, start: datetime, end: datetime
+    ) -> List[Dict[str, Any]]:
         # Ensure datetimes are naive to match DB constructed timestamp
         if start.tzinfo is not None:
             start = start.replace(tzinfo=None)
@@ -216,26 +221,26 @@ class DashboardRepo(BaseRepo):
         """
         async with self.pool.acquire() as conn:
             row = await conn.fetchrow(query, potline_id)
-        
+
         if not row:
             return {
-                "ce_trend": 0.0, 
-                "optimal_diff": 0, 
-                "warning_diff": 0, 
-                "critical_diff": 0
+                "ce_trend": 0.0,
+                "optimal_diff": 0,
+                "warning_diff": 0,
+                "critical_diff": 0,
             }
 
         def diff(curr, prev):
             return (curr or 0) - (prev or 0)
 
         # Calculate CE Trend
-        curr_ce = row['curr_ce'] or 0
-        prev_ce = row['prev_ce'] or 0
+        curr_ce = row["curr_ce"] or 0
+        prev_ce = row["prev_ce"] or 0
         ce_trend = float(curr_ce - prev_ce) if prev_ce > 0 else 0.0
 
         return {
             "ce_trend": ce_trend,
-            "optimal_diff": diff(row['curr_opt'], row['prev_opt']),
-            "warning_diff": diff(row['curr_warn'], row['prev_warn']),
-            "critical_diff": diff(row['curr_crit'], row['prev_crit'])
+            "optimal_diff": diff(row["curr_opt"], row["prev_opt"]),
+            "warning_diff": diff(row["curr_warn"], row["prev_warn"]),
+            "critical_diff": diff(row["curr_crit"], row["prev_crit"]),
         }

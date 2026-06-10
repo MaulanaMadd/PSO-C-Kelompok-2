@@ -1,9 +1,9 @@
 import os
-import sys
-import joblib
 from datetime import datetime
-from sqlalchemy import create_engine, text
+
+import joblib
 from dotenv import load_dotenv
+from sqlalchemy import create_engine, text
 
 load_dotenv()
 
@@ -16,11 +16,11 @@ def register_model(
     trained_by: str = None,
     training_metrics: dict = None,
     training_data_period: dict = None,
-    notes: str = None
+    notes: str = None,
 ):
     """
     Register a model in the model registry
-    
+
     Args:
         model_name: Name of the model (e.g., "lgbm_production")
         model_version: Version string (e.g., "v1.0")
@@ -34,12 +34,12 @@ def register_model(
     db_url = os.getenv("DATABASE_URL")
     if not db_url:
         raise ValueError("DATABASE_URL not found")
-    
+
     if db_url.startswith("postgres://"):
         db_url = db_url.replace("postgres://", "postgresql://", 1)
-    
+
     engine = create_engine(db_url)
-    
+
     # Get feature count from bundle if available
     feature_count = None
     feature_list = None
@@ -50,17 +50,21 @@ def register_model(
             feature_list = bundle.get("feature_cols", [])
         except:
             pass
-    
+
     with engine.begin() as conn:
         # Set all existing models for this name to inactive
-        conn.execute(text("""
+        conn.execute(
+            text("""
             UPDATE ml.model_registry
             SET status = 'inactive'
             WHERE model_name = :model_name AND status = 'active'
-        """), {"model_name": model_name})
-        
+        """),
+            {"model_name": model_name},
+        )
+
         # Insert new model as active
-        conn.execute(text("""
+        conn.execute(
+            text("""
             INSERT INTO ml.model_registry (
                 model_name, model_version, model_type, file_path,
                 trained_at, trained_by, training_metrics, training_data_period,
@@ -80,41 +84,45 @@ def register_model(
                 training_data_period = EXCLUDED.training_data_period,
                 feature_count = EXCLUDED.feature_count,
                 notes = EXCLUDED.notes
-        """), {
-            "model_name": model_name,
-            "model_version": model_version,
-            "model_type": model_type,
-            "file_path": file_path,
-            "trained_at": datetime.now(),
-            "trained_by": trained_by or "system",
-            "training_metrics": str(training_metrics) if training_metrics else None,
-            "training_data_period": str(training_data_period) if training_data_period else None,
-            "feature_count": feature_count,
-            "feature_list": feature_list,
-            "notes": notes
-        })
-    
+        """),
+            {
+                "model_name": model_name,
+                "model_version": model_version,
+                "model_type": model_type,
+                "file_path": file_path,
+                "trained_at": datetime.now(),
+                "trained_by": trained_by or "system",
+                "training_metrics": str(training_metrics) if training_metrics else None,
+                "training_data_period": str(training_data_period)
+                if training_data_period
+                else None,
+                "feature_count": feature_count,
+                "feature_list": feature_list,
+                "notes": notes,
+            },
+        )
+
     print(f"✓ Registered model: {model_name} {model_version} as active")
 
 
 if __name__ == "__main__":
     # Register the production model
     bundle_path = os.path.join(
-        os.path.dirname(__file__), 
-        "..", "app", "ml", "artifacts", "lgbm_ce_next_bundle.pkl"
+        os.path.dirname(__file__),
+        "..",
+        "app",
+        "ml",
+        "artifacts",
+        "lgbm_ce_next_bundle.pkl",
     )
-    
+
     register_model(
         model_name="lgbm_production",
         model_version="v1.0",
         model_type="lgbm",
         file_path=bundle_path,
         trained_by="Data Science Team",
-        training_metrics={
-            "note": "Metrics to be added after model evaluation"
-        },
-        training_data_period={
-            "note": "Training period to be documented"
-        },
-        notes="Production LightGBM model for CE prediction with full preprocessing pipeline"
+        training_metrics={"note": "Metrics to be added after model evaluation"},
+        training_data_period={"note": "Training period to be documented"},
+        notes="Production LightGBM model for CE prediction with full preprocessing pipeline",
     )

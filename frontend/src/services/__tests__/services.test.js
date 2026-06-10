@@ -1,288 +1,315 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+/**
+ * services/__tests__/services.test.js
+ *
+ * Unit test untuk service layer asli:
+ *   - authService (login, signup, logout, getToken, isAuthenticated, getProfile)
+ *   - notificationService (getAll, getUnread, create, markAsRead)
+ *   - potService (getPots, getPotlines)
+ *
+ * Semua HTTP request di-mock menggunakan vi.mock('axios') sehingga tidak
+ * butuh server backend yang berjalan.
+ */
 
-describe('Auth Service', () => {
-  beforeEach(() => {
-    localStorage.clear()
-    vi.clearAllMocks()
-  })
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-  it('stores auth token on signup', () => {
-    const authService = {
-      signup: (email, password) => {
-        localStorage.setItem('authToken', 'mock-token')
-        return { success: true }
-      }
-    }
-    authService.signup('test@example.com', 'password123')
-    expect(localStorage.getItem('authToken')).toBe('mock-token')
-  })
+// ─── Mock axios sebelum import apapun ───────────────────────────────────────
+vi.mock("axios", () => {
+	const mockAxios = {
+		create: vi.fn(() => mockAxios),
+		get: vi.fn(),
+		post: vi.fn(),
+		put: vi.fn(),
+		delete: vi.fn(),
+		interceptors: {
+			request: { use: vi.fn(), handlers: [] },
+			response: { use: vi.fn(), handlers: [] },
+		},
+		defaults: { headers: { common: {} } },
+	};
+	return { default: mockAxios };
+});
 
-  it('stores auth token on login', () => {
-    const authService = {
-      login: (email, password) => {
-        localStorage.setItem('authToken', 'mock-token')
-        return { success: true }
-      }
-    }
-    authService.login('test@example.com', 'password123')
-    expect(localStorage.getItem('authToken')).toBe('mock-token')
-  })
+import api from "../api";
+// ─── Import service SETELAH mock ─────────────────────────────────────────────
+import { authService } from "../authService";
+import { notificationService } from "../notificationService";
 
-  it('retrieves auth token from localStorage', () => {
-    localStorage.setItem('authToken', 'stored-token')
-    const authService = {
-      getToken: () => localStorage.getItem('authToken')
-    }
-    expect(authService.getToken()).toBe('stored-token')
-  })
+// ─────────────────────────────────────────────────────────────────────────────
+// Auth Service
+// ─────────────────────────────────────────────────────────────────────────────
 
-  it('clears auth token on logout', () => {
-    localStorage.setItem('authToken', 'mock-token')
-    const authService = {
-      logout: () => localStorage.removeItem('authToken')
-    }
-    authService.logout()
-    expect(localStorage.getItem('authToken')).toBeNull()
-  })
+describe("authService", () => {
+	beforeEach(() => {
+		localStorage.clear();
+		vi.clearAllMocks();
+		// Reset window.location
+		delete window.location;
+		window.location = { href: "" };
+	});
 
-  it('validates token exists', () => {
-    const authService = {
-      isAuthenticated: () => localStorage.getItem('authToken') !== null
-    }
-    expect(authService.isAuthenticated()).toBe(false)
-    localStorage.setItem('authToken', 'token')
-    expect(authService.isAuthenticated()).toBe(true)
-  })
-})
+	afterEach(() => {
+		vi.restoreAllMocks();
+	});
 
-describe('POT Service', () => {
-  it('formats pot data correctly', () => {
-    const potService = {
-      formatPotData: (pot) => ({
-        id: pot.id,
-        name: pot.pot_name,
-        status: pot.status,
-        efficiency: pot.efficiency_percent
-      })
-    }
-    const mockPot = {
-      id: 1,
-      pot_name: 'POT-001',
-      status: 'normal',
-      efficiency_percent: 95.5
-    }
-    const formatted = potService.formatPotData(mockPot)
-    expect(formatted.name).toBe('POT-001')
-    expect(formatted.efficiency).toBe(95.5)
-  })
+	// ── login ──────────────────────────────────────────────────────────────────
 
-  it('groups pots by potline', () => {
-    const potService = {
-      groupByPotline: (pots) => {
-        const grouped = {}
-        pots.forEach(pot => {
-          if (!grouped[pot.potline_id]) grouped[pot.potline_id] = []
-          grouped[pot.potline_id].push(pot)
-        })
-        return grouped
-      }
-    }
-    const pots = [
-      { id: 1, potline_id: 1, name: 'POT-001' },
-      { id: 2, potline_id: 1, name: 'POT-002' },
-      { id: 3, potline_id: 2, name: 'POT-003' }
-    ]
-    const grouped = potService.groupByPotline(pots)
-    expect(grouped[1]).toHaveLength(2)
-    expect(grouped[2]).toHaveLength(1)
-  })
+	describe("login", () => {
+		it("stores access_token in localStorage on success", async () => {
+			api.post.mockResolvedValueOnce({
+				data: { access_token: "jwt-token-123", token_type: "bearer" },
+			});
+			await authService.login({ email: "user@test.com", password: "pass123" });
+			expect(localStorage.getItem("authToken")).toBe("jwt-token-123");
+		});
 
-  it('filters pots by status', () => {
-    const potService = {
-      filterByStatus: (pots, status) => pots.filter(p => p.status === status)
-    }
-    const pots = [
-      { id: 1, status: 'normal' },
-      { id: 2, status: 'alarm' },
-      { id: 3, status: 'normal' }
-    ]
-    const alarmPots = potService.filterByStatus(pots, 'alarm')
-    expect(alarmPots).toHaveLength(1)
-    expect(alarmPots[0].id).toBe(2)
-  })
-})
+		it("returns response data on success", async () => {
+			api.post.mockResolvedValueOnce({
+				data: { access_token: "jwt-token-abc", token_type: "bearer" },
+			});
+			const result = await authService.login({
+				email: "user@test.com",
+				password: "pass123",
+			});
+			expect(result.access_token).toBe("jwt-token-abc");
+			expect(result.token_type).toBe("bearer");
+		});
 
-describe('Notification Service', () => {
-  it('fetches notifications', async () => {
-    const notificationService = {
-      getNotifications: async () => [
-        { id: 1, title: 'Alert 1', read: false },
-        { id: 2, title: 'Alert 2', read: true }
-      ]
-    }
-    const notifications = await notificationService.getNotifications()
-    expect(notifications).toHaveLength(2)
-  })
+		it("sends FormData to /auth/login", async () => {
+			api.post.mockResolvedValueOnce({
+				data: { access_token: "token", token_type: "bearer" },
+			});
+			await authService.login({ email: "user@test.com", password: "pass" });
+			const [url, body] = api.post.mock.calls[0];
+			expect(url).toBe("/auth/login");
+			expect(body).toBeInstanceOf(FormData);
+		});
 
-  it('marks notification as read', async () => {
-    const notificationService = {
-      markAsRead: async (id) => ({ id, read: true })
-    }
-    const result = await notificationService.markAsRead(1)
-    expect(result.read).toBe(true)
-  })
+		it("throws error on failed login", async () => {
+			api.post.mockRejectedValueOnce(new Error("Unauthorized"));
+			await expect(
+				authService.login({ email: "bad@test.com", password: "wrong" }),
+			).rejects.toThrow("Unauthorized");
+		});
 
-  it('creates new notification', async () => {
-    const notificationService = {
-      create: async (data) => ({ id: 1, ...data, read: false })
-    }
-    const notification = await notificationService.create({
-      title: 'New Alert',
-      message: 'Test message'
-    })
-    expect(notification.title).toBe('New Alert')
-    expect(notification.read).toBe(false)
-  })
+		it("does not store token if response has no access_token", async () => {
+			api.post.mockResolvedValueOnce({ data: {} });
+			await authService.login({ email: "user@test.com", password: "pass" });
+			expect(localStorage.getItem("authToken")).toBeNull();
+		});
+	});
 
-  it('counts unread notifications', () => {
-    const notificationService = {
-      countUnread: (notifications) =>
-        notifications.filter(n => !n.read).length
-    }
-    const notifications = [
-      { id: 1, read: false },
-      { id: 2, read: true },
-      { id: 3, read: false }
-    ]
-    expect(notificationService.countUnread(notifications)).toBe(2)
-  })
-})
+	// ── signup ─────────────────────────────────────────────────────────────────
 
-describe('Dashboard Data Hook', () => {
-  it('initializes with loading state', () => {
-    const useDashboardData = () => {
-      const [loading, setLoading] = React.useState(true)
-      return { loading }
-    }
-    const TestComponent = () => {
-      const { loading } = useDashboardData()
-      return <div>{loading ? 'Loading' : 'Loaded'}</div>
-    }
-    render(<TestComponent />)
-    expect(screen.getByText('Loading')).toBeInTheDocument()
-  })
+	describe("signup", () => {
+		it("calls /auth/signup with user data", async () => {
+			const userData = {
+				email: "new@test.com",
+				password: "pass",
+				full_name: "New User",
+			};
+			api.post.mockResolvedValueOnce({ data: { id: 1, ...userData } });
+			const result = await authService.signup(userData);
+			expect(api.post).toHaveBeenCalledWith("/auth/signup", userData);
+			expect(result.email).toBe("new@test.com");
+		});
 
-  it('loads dashboard data', async () => {
-    const useDashboardData = () => {
-      const [data, setData] = React.useState(null)
-      React.useEffect(() => {
-        setData({ pots: 50, alarms: 3 })
-      }, [])
-      return data
-    }
-    const TestComponent = () => {
-      const data = useDashboardData()
-      return data ? (
-        <div>POTs: {data.pots}, Alarms: {data.alarms}</div>
-      ) : (
-        <div>Loading</div>
-      )
-    }
-    render(<TestComponent />)
-    await waitFor(() => {
-      expect(screen.getByText('POTs: 50, Alarms: 3')).toBeInTheDocument()
-    })
-  })
+		it("throws error on signup failure", async () => {
+			api.post.mockRejectedValueOnce(new Error("Email already registered"));
+			await expect(
+				authService.signup({
+					email: "dup@test.com",
+					password: "pass",
+					full_name: "Dup",
+				}),
+			).rejects.toThrow();
+		});
+	});
 
-  it('handles errors in dashboard data', async () => {
-    const useDashboardData = () => {
-      const [error, setError] = React.useState(null)
-      React.useEffect(() => {
-        setError('Failed to load data')
-      }, [])
-      return { error }
-    }
-    const TestComponent = () => {
-      const { error } = useDashboardData()
-      return error ? <div>{error}</div> : <div>Loaded</div>
-    }
-    render(<TestComponent />)
-    await waitFor(() => {
-      expect(screen.getByText('Failed to load data')).toBeInTheDocument()
-    })
-  })
-})
+	// ── logout ─────────────────────────────────────────────────────────────────
 
-describe('API Request/Response Handling', () => {
-  it('handles successful API response', async () => {
-    const api = {
-      request: async () => ({
-        status: 200,
-        data: { success: true }
-      })
-    }
-    const response = await api.request()
-    expect(response.status).toBe(200)
-    expect(response.data.success).toBe(true)
-  })
+	describe("logout", () => {
+		it("removes authToken from localStorage", () => {
+			localStorage.setItem("authToken", "existing-token");
+			authService.logout();
+			expect(localStorage.getItem("authToken")).toBeNull();
+		});
 
-  it('handles API errors', async () => {
-    const api = {
-      request: async () => {
-        throw new Error('Network error')
-      }
-    }
-    try {
-      await api.request()
-    } catch (error) {
-      expect(error.message).toBe('Network error')
-    }
-  })
+		it("redirects to /login", () => {
+			authService.logout();
+			expect(window.location.href).toBe("/login");
+		});
+	});
 
-  it('adds authorization header to requests', () => {
-    localStorage.setItem('authToken', 'test-token')
-    const api = {
-      getHeaders: () => ({
-        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-      })
-    }
-    const headers = api.getHeaders()
-    expect(headers['Authorization']).toBe('Bearer test-token')
-  })
+	// ── getToken ───────────────────────────────────────────────────────────────
 
-  it('removes auth token on 401 response', () => {
-    localStorage.setItem('authToken', 'test-token')
-    const api = {
-      handleUnauthorized: () => {
-        localStorage.removeItem('authToken')
-      }
-    }
-    api.handleUnauthorized()
-    expect(localStorage.getItem('authToken')).toBeNull()
-  })
-})
+	describe("getToken", () => {
+		it("returns null when no token stored", () => {
+			expect(authService.getToken()).toBeNull();
+		});
 
-describe('Data Formatting', () => {
-  it('formats date strings', () => {
-    const formatter = {
-      formatDate: (date) => new Date(date).toLocaleDateString('en-US')
-    }
-    const formatted = formatter.formatDate('2024-01-15')
-    expect(formatted).toContain('1')
-  })
+		it("returns token when stored", () => {
+			localStorage.setItem("authToken", "my-jwt-token");
+			expect(authService.getToken()).toBe("my-jwt-token");
+		});
+	});
 
-  it('formats numbers with decimals', () => {
-    const formatter = {
-      formatNumber: (num) => num.toFixed(2)
-    }
-    expect(formatter.formatNumber(95.5678)).toBe('95.57')
-  })
+	// ── isAuthenticated ────────────────────────────────────────────────────────
 
-  it('formats percentages', () => {
-    const formatter = {
-      formatPercent: (num) => `${(num * 100).toFixed(1)}%`
-    }
-    expect(formatter.formatPercent(0.955)).toBe('95.5%')
-  })
-})
+	describe("isAuthenticated", () => {
+		it("returns false when no token", () => {
+			expect(authService.isAuthenticated()).toBe(false);
+		});
+
+		it("returns true when token exists", () => {
+			localStorage.setItem("authToken", "some-token");
+			expect(authService.isAuthenticated()).toBe(true);
+		});
+	});
+
+	// ── getProfile ─────────────────────────────────────────────────────────────
+
+	describe("getProfile", () => {
+		it("calls /auth/me endpoint", async () => {
+			const profile = {
+				id: 1,
+				email: "user@test.com",
+				full_name: "User",
+				role: "user",
+			};
+			api.get.mockResolvedValueOnce({ data: profile });
+			const result = await authService.getProfile();
+			expect(api.get).toHaveBeenCalledWith(expect.stringContaining("/auth/me"));
+			expect(result.email).toBe("user@test.com");
+		});
+
+		it("throws error on failed profile fetch", async () => {
+			api.get.mockRejectedValueOnce(new Error("Unauthorized"));
+			await expect(authService.getProfile()).rejects.toThrow();
+		});
+	});
+
+	// ── updateProfile ──────────────────────────────────────────────────────────
+
+	describe("updateProfile", () => {
+		it("calls /auth/me with PUT", async () => {
+			const updateData = { full_name: "Updated Name" };
+			api.put.mockResolvedValueOnce({ data: { id: 1, ...updateData } });
+			const result = await authService.updateProfile(updateData);
+			expect(api.put).toHaveBeenCalledWith("/auth/me", updateData);
+			expect(result.full_name).toBe("Updated Name");
+		});
+	});
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Notification Service
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("notificationService", () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+	});
+
+	describe("getAll", () => {
+		it("returns notifications array on success", async () => {
+			const notifications = [
+				{ id: 1, title: "Alert 1", is_read: false },
+				{ id: 2, title: "Alert 2", is_read: true },
+			];
+			api.get.mockResolvedValueOnce({ data: notifications });
+			const result = await notificationService.getAll();
+			expect(result).toHaveLength(2);
+			expect(result[0].title).toBe("Alert 1");
+		});
+
+		it("returns empty array on error", async () => {
+			api.get.mockRejectedValueOnce(new Error("Network Error"));
+			const result = await notificationService.getAll();
+			expect(result).toEqual([]);
+		});
+
+		it("calls /notifications/ endpoint", async () => {
+			api.get.mockResolvedValueOnce({ data: [] });
+			await notificationService.getAll();
+			expect(api.get).toHaveBeenCalledWith("/notifications/");
+		});
+	});
+
+	describe("getUnread", () => {
+		it("returns unread notifications", async () => {
+			const unread = [{ id: 1, is_read: false }];
+			api.get.mockResolvedValueOnce({ data: unread });
+			const result = await notificationService.getUnread();
+			expect(result).toHaveLength(1);
+			expect(result[0].is_read).toBe(false);
+		});
+
+		it("calls /notifications/?unread_only=true", async () => {
+			api.get.mockResolvedValueOnce({ data: [] });
+			await notificationService.getUnread();
+			expect(api.get).toHaveBeenCalledWith("/notifications/?unread_only=true");
+		});
+
+		it("returns empty array on error", async () => {
+			api.get.mockRejectedValueOnce(new Error("Network Error"));
+			const result = await notificationService.getUnread();
+			expect(result).toEqual([]);
+		});
+	});
+
+	describe("create", () => {
+		it("creates notification and returns data", async () => {
+			const created = {
+				id: 42,
+				type: "alert",
+				title: "New Alert",
+				message: "Msg",
+				is_read: false,
+			};
+			api.post.mockResolvedValueOnce({ data: created });
+			const result = await notificationService.create(
+				"alert",
+				"New Alert",
+				"Msg",
+			);
+			expect(result.id).toBe(42);
+			expect(result.is_read).toBe(false);
+		});
+
+		it("calls /notifications/ with correct data", async () => {
+			api.post.mockResolvedValueOnce({ data: {} });
+			await notificationService.create("warning", "Warn", "Warning msg");
+			expect(api.post).toHaveBeenCalledWith("/notifications/", {
+				type: "warning",
+				title: "Warn",
+				message: "Warning msg",
+			});
+		});
+
+		it("returns null on error", async () => {
+			api.post.mockRejectedValueOnce(new Error("Network Error"));
+			const result = await notificationService.create("alert", "T", "M");
+			expect(result).toBeNull();
+		});
+	});
+
+	describe("markAsRead", () => {
+		it("returns true on success", async () => {
+			api.put.mockResolvedValueOnce({ data: { status: "success" } });
+			const result = await notificationService.markAsRead(1);
+			expect(result).toBe(true);
+		});
+
+		it("calls /notifications/{id}/read/", async () => {
+			api.put.mockResolvedValueOnce({ data: {} });
+			await notificationService.markAsRead(42);
+			expect(api.put).toHaveBeenCalledWith("/notifications/42/read/");
+		});
+
+		it("returns false on error", async () => {
+			api.put.mockRejectedValueOnce(new Error("Network Error"));
+			const result = await notificationService.markAsRead(99);
+			expect(result).toBe(false);
+		});
+	});
+});

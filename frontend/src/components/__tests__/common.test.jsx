@@ -1,110 +1,293 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import Toast from '../common/Toast'
-import NotificationMonitor from '../common/NotificationMonitor'
-import ProtectedRoute from '../common/ProtectedRoute'
-import { BrowserRouter } from 'react-router-dom'
+/**
+ * components/__tests__/common.test.jsx
+ *
+ * Unit test untuk common components yang sebenarnya:
+ *   - Toast (dari components/common/Toast.jsx)
+ *   - ToastContainer
+ *   - ProtectedRoute (dari components/common/ProtectedRoute.jsx)
+ *   - NotificationMonitor (dari components/common/NotificationMonitor.jsx)
+ */
 
-describe('Toast Component', () => {
-  it('renders toast with success message', () => {
-    render(<Toast message="Success!" type="success" onClose={() => {}} />)
-    expect(screen.getByText('Success!')).toBeInTheDocument()
-  })
+import {
+	act,
+	fireEvent,
+	render,
+	screen,
+	waitFor,
+} from "@testing-library/react";
+import React from "react";
+import { BrowserRouter, MemoryRouter, Route, Routes } from "react-router-dom";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-  it('renders toast with error message', () => {
-    render(<Toast message="Error occurred!" type="error" onClose={() => {}} />)
-    expect(screen.getByText('Error occurred!')).toBeInTheDocument()
-  })
+// ─── Mock services sebelum import komponen ───────────────────────────────────
+vi.mock("../../services/authService", () => ({
+	authService: {
+		isAuthenticated: vi.fn(() => false),
+		getToken: vi.fn(() => null),
+		getProfile: vi.fn(() => Promise.resolve(null)),
+	},
+}));
 
-  it('renders toast with warning message', () => {
-    render(<Toast message="Warning!" type="warning" onClose={() => {}} />)
-    expect(screen.getByText('Warning!')).toBeInTheDocument()
-  })
+vi.mock("../../services/notificationService", () => ({
+	notificationService: {
+		getUnread: vi.fn(() => Promise.resolve([])),
+		markAsRead: vi.fn(() => Promise.resolve(true)),
+	},
+}));
 
-  it('calls onClose when close button is clicked', () => {
-    const handleClose = vi.fn()
-    const { container } = render(
-      <Toast message="Test" type="success" onClose={handleClose} />
-    )
-    const closeBtn = container.querySelector('[class*="close"]')
-    if (closeBtn) fireEvent.click(closeBtn)
-  })
+vi.mock("../../services/api", () => ({
+	default: {
+		get: vi.fn(() => Promise.resolve({ data: [] })),
+	},
+}));
 
-  it('auto-closes after timeout', async () => {
-    const handleClose = vi.fn()
-    render(
-      <Toast message="Auto close" type="success" onClose={handleClose} autoClose={2000} />
-    )
-    await waitFor(() => {
-      expect(handleClose).toHaveBeenCalled()
-    }, { timeout: 3000 })
-  })
+import { authService } from "../../services/authService";
+import NotificationMonitor from "../common/NotificationMonitor";
+import ProtectedRoute from "../common/ProtectedRoute";
+// ─── Import komponen SETELAH mock ─────────────────────────────────────────────
+import Toast, { ToastContainer } from "../common/Toast";
 
-  it('applies correct styling classes', () => {
-    const { container } = render(
-      <Toast message="Styled" type="error" onClose={() => {}} />
-    )
-    const toast = container.querySelector('[class*="toast"]')
-    expect(toast).toBeTruthy()
-  })
-})
+// ─────────────────────────────────────────────────────────────────────────────
+// Toast Component
+// ─────────────────────────────────────────────────────────────────────────────
 
-describe('ProtectedRoute Component', () => {
-  it('renders component when user is authenticated', () => {
-    const TestComponent = () => <div>Protected Content</div>
-    localStorage.setItem('authToken', 'valid-token')
+describe("Toast Component", () => {
+	let onCloseMock;
 
-    render(
-      <BrowserRouter>
-        <ProtectedRoute component={<TestComponent />} />
-      </BrowserRouter>
-    )
-    expect(screen.getByText('Protected Content')).toBeInTheDocument()
-  })
+	beforeEach(() => {
+		onCloseMock = vi.fn();
+		vi.useFakeTimers();
+	});
 
-  it('redirects to login when user is not authenticated', () => {
-    localStorage.removeItem('authToken')
-    const TestComponent = () => <div>Protected Content</div>
+	afterEach(() => {
+		vi.runOnlyPendingTimers();
+		vi.useRealTimers();
+	});
 
-    const { container } = render(
-      <BrowserRouter>
-        <ProtectedRoute component={<TestComponent />} />
-      </BrowserRouter>
-    )
-    // Should redirect or show login UI
-    expect(screen.queryByText('Protected Content')).not.toBeInTheDocument()
-  })
-})
+	it("renders with success message", () => {
+		render(
+			<Toast
+				key_id="1"
+				message="Berhasil disimpan!"
+				type="success"
+				onClose={onCloseMock}
+			/>,
+		);
+		expect(screen.getByText("Berhasil disimpan!")).toBeInTheDocument();
+	});
 
-describe('NotificationMonitor Component', () => {
-  it('renders notification monitor', () => {
-    const { container } = render(
-      <BrowserRouter>
-        <NotificationMonitor />
-      </BrowserRouter>
-    )
-    expect(container).toBeTruthy()
-  })
+	it("renders with error message", () => {
+		render(
+			<Toast
+				key_id="2"
+				message="Terjadi kesalahan!"
+				type="error"
+				onClose={onCloseMock}
+			/>,
+		);
+		expect(screen.getByText("Terjadi kesalahan!")).toBeInTheDocument();
+	});
 
-  it('displays notifications from props', () => {
-    const notifications = [
-      { id: 1, title: 'Test 1', message: 'Message 1' },
-      { id: 2, title: 'Test 2', message: 'Message 2' }
-    ]
-    const { container } = render(
-      <BrowserRouter>
-        <NotificationMonitor notifications={notifications} />
-      </BrowserRouter>
-    )
-    expect(container).toBeTruthy()
-  })
+	it("renders with warning message", () => {
+		render(
+			<Toast
+				key_id="3"
+				message="Perhatian!"
+				type="warning"
+				onClose={onCloseMock}
+			/>,
+		);
+		expect(screen.getByText("Perhatian!")).toBeInTheDocument();
+	});
 
-  it('handles empty notifications list', () => {
-    const { container } = render(
-      <BrowserRouter>
-        <NotificationMonitor notifications={[]} />
-      </BrowserRouter>
-    )
-    expect(container).toBeTruthy()
-  })
-})
+	it("renders with info message (default)", () => {
+		render(
+			<Toast
+				key_id="4"
+				message="Info baru"
+				type="info"
+				onClose={onCloseMock}
+			/>,
+		);
+		expect(screen.getByText("Info baru")).toBeInTheDocument();
+	});
+
+	it("calls onClose with key_id when close button is clicked", () => {
+		render(
+			<Toast
+				key_id="toast-1"
+				message="Test"
+				type="success"
+				onClose={onCloseMock}
+			/>,
+		);
+		// Close button menggunakan X icon dari lucide-react
+		const button = document.querySelector("button");
+		expect(button).not.toBeNull();
+		fireEvent.click(button);
+		expect(onCloseMock).toHaveBeenCalledWith("toast-1");
+	});
+
+	it("auto-closes after duration via useEffect timer", async () => {
+		render(
+			<Toast
+				key_id="auto-1"
+				message="Auto close"
+				type="success"
+				onClose={onCloseMock}
+				duration={2000}
+			/>,
+		);
+		// Advance timer to trigger setTimeout
+		act(() => {
+			vi.advanceTimersByTime(2001);
+		});
+		expect(onCloseMock).toHaveBeenCalledWith("auto-1");
+	});
+
+	it("uses default duration of 5000ms", async () => {
+		render(
+			<Toast
+				key_id="default-dur"
+				message="Test"
+				type="success"
+				onClose={onCloseMock}
+			/>,
+		);
+		// Should NOT call before 5000ms
+		act(() => {
+			vi.advanceTimersByTime(4999);
+		});
+		expect(onCloseMock).not.toHaveBeenCalled();
+		// Should call at/after 5000ms
+		act(() => {
+			vi.advanceTimersByTime(1);
+		});
+		expect(onCloseMock).toHaveBeenCalledWith("default-dur");
+	});
+
+	it("renders a div wrapper", () => {
+		const { container } = render(
+			<Toast key_id="5" message="Test" type="success" onClose={onCloseMock} />,
+		);
+		expect(container.firstChild).not.toBeNull();
+	});
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ToastContainer Component
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("ToastContainer Component", () => {
+	it("renders empty container when no toasts", () => {
+		const { container } = render(
+			<ToastContainer toasts={[]} removeToast={vi.fn()} />,
+		);
+		expect(container.firstChild).not.toBeNull();
+	});
+
+	it("renders multiple toasts", () => {
+		vi.useFakeTimers();
+		const toasts = [
+			{ id: "1", message: "Toast 1", type: "success" },
+			{ id: "2", message: "Toast 2", type: "error" },
+		];
+		render(<ToastContainer toasts={toasts} removeToast={vi.fn()} />);
+		expect(screen.getByText("Toast 1")).toBeInTheDocument();
+		expect(screen.getByText("Toast 2")).toBeInTheDocument();
+		vi.useRealTimers();
+	});
+
+	it("calls removeToast when toast auto-closes", () => {
+		vi.useFakeTimers();
+		const removeToast = vi.fn();
+		const toasts = [{ id: "x1", message: "Test", type: "info" }];
+		render(<ToastContainer toasts={toasts} removeToast={removeToast} />);
+		act(() => {
+			vi.advanceTimersByTime(5001);
+		});
+		expect(removeToast).toHaveBeenCalledWith("x1");
+		vi.useRealTimers();
+	});
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ProtectedRoute Component
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("ProtectedRoute Component", () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+	});
+
+	it("redirects to /login when user is not authenticated", () => {
+		authService.isAuthenticated.mockReturnValue(false);
+
+		render(
+			<MemoryRouter initialEntries={["/dashboard"]}>
+				<Routes>
+					<Route path="/login" element={<div>Login Page</div>} />
+					<Route element={<ProtectedRoute />}>
+						<Route path="/dashboard" element={<div>Protected Content</div>} />
+					</Route>
+				</Routes>
+			</MemoryRouter>,
+		);
+
+		expect(screen.getByText("Login Page")).toBeInTheDocument();
+		expect(screen.queryByText("Protected Content")).not.toBeInTheDocument();
+	});
+
+	it("renders child content when user is authenticated", () => {
+		authService.isAuthenticated.mockReturnValue(true);
+
+		render(
+			<MemoryRouter initialEntries={["/dashboard"]}>
+				<Routes>
+					<Route path="/login" element={<div>Login Page</div>} />
+					<Route element={<ProtectedRoute />}>
+						<Route path="/dashboard" element={<div>Protected Content</div>} />
+					</Route>
+				</Routes>
+			</MemoryRouter>,
+		);
+
+		expect(screen.getByText("Protected Content")).toBeInTheDocument();
+		expect(screen.queryByText("Login Page")).not.toBeInTheDocument();
+	});
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// NotificationMonitor Component
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("NotificationMonitor Component", () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+		vi.useFakeTimers();
+	});
+
+	afterEach(() => {
+		vi.runOnlyPendingTimers();
+		vi.useRealTimers();
+	});
+
+	it("renders without crashing", () => {
+		const { container } = render(
+			<BrowserRouter>
+				<NotificationMonitor />
+			</BrowserRouter>,
+		);
+		expect(container).toBeTruthy();
+	});
+
+	it("mounts and runs without errors", async () => {
+		expect(() => {
+			render(
+				<BrowserRouter>
+					<NotificationMonitor />
+				</BrowserRouter>,
+			);
+		}).not.toThrow();
+	});
+});

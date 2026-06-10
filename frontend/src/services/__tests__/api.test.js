@@ -1,111 +1,144 @@
-import { describe, test, expect, beforeEach, vi } from 'vitest'
-import api from '../api'
-describe('API Interceptors', () => {
-  beforeEach(() => {
-    localStorage.clear()
-    vi.restoreAllMocks()
-  })
+/**
+ * services/__tests__/api.test.js
+ *
+ * Unit test untuk axios instance dan interceptors di api.js.
+ * Menguji behavior interceptor request/response secara langsung.
+ */
 
-  test('adds Authorization header when authToken exists', () => {
-    localStorage.setItem('authToken', 'abc123')
+import { afterEach, beforeEach, describe, expect, it, test, vi } from "vitest";
+import api from "../api";
 
-    const handlers = api.interceptors.request.handlers
+describe("API Instance", () => {
+	it("is an axios instance", () => {
+		expect(api).toBeDefined();
+		expect(api.interceptors).toBeDefined();
+		expect(api.interceptors.request).toBeDefined();
+		expect(api.interceptors.response).toBeDefined();
+	});
+});
 
-    const fulfilled = handlers.find(
-      h => typeof h.fulfilled === 'function'
-    )?.fulfilled
+describe("API Request Interceptor", () => {
+	beforeEach(() => {
+		localStorage.clear();
+		vi.restoreAllMocks();
+	});
 
-    const config = {
-      headers: {}
-    }
+	function getRequestInterceptor() {
+		const handlers = api.interceptors.request.handlers;
+		return handlers.find((h) => typeof h.fulfilled === "function")?.fulfilled;
+	}
 
-    const result = fulfilled(config)
+	test("adds Authorization header when authToken exists in localStorage", () => {
+		localStorage.setItem("authToken", "abc123");
+		const fulfilled = getRequestInterceptor();
+		const config = { headers: {} };
+		const result = fulfilled(config);
+		expect(result.headers.Authorization).toBe("Bearer abc123");
+	});
 
-    expect(result.headers.Authorization)
-      .toBe('Bearer abc123')
-  })
+	test("does not add Authorization header when no token in localStorage", () => {
+		const fulfilled = getRequestInterceptor();
+		const config = { headers: {} };
+		const result = fulfilled(config);
+		expect(result.headers.Authorization).toBeUndefined();
+	});
 
-  test('does not add Authorization header when authToken does not exist', () => {
-    const handlers = api.interceptors.request.handlers
+	test("returns the config object with headers intact", () => {
+		localStorage.setItem("authToken", "my-token");
+		const fulfilled = getRequestInterceptor();
+		const config = { headers: { "Content-Type": "application/json" } };
+		const result = fulfilled(config);
+		expect(result.headers["Content-Type"]).toBe("application/json");
+		expect(result.headers.Authorization).toBe("Bearer my-token");
+	});
 
-    const fulfilled = handlers.find(
-      h => typeof h.fulfilled === 'function'
-    )?.fulfilled
+	test("request error handler rejects with error", async () => {
+		const handlers = api.interceptors.request.handlers;
+		const rejected = handlers.find(
+			(h) => typeof h.rejected === "function",
+		)?.rejected;
+		if (rejected) {
+			const error = new Error("Request failed");
+			await expect(rejected(error)).rejects.toThrow("Request failed");
+		}
+	});
+});
 
-    const config = {
-      headers: {}
-    }
+describe("API Response Interceptor", () => {
+	beforeEach(() => {
+		localStorage.clear();
+		vi.restoreAllMocks();
+		delete window.location;
+		window.location = { href: "" };
+	});
 
-    const result = fulfilled(config)
+	function getResponseInterceptor() {
+		const handlers = api.interceptors.response.handlers;
+		return handlers.find((h) => typeof h.rejected === "function")?.rejected;
+	}
 
-    expect(result.headers.Authorization)
-      .toBeUndefined()
-  })
+	test("removes authToken from localStorage on 401 response", async () => {
+		localStorage.setItem("authToken", "abc123");
+		const removeSpy = vi.spyOn(Storage.prototype, "removeItem");
 
-  test('removes token on 401 response', async () => {
-    localStorage.setItem('authToken', 'abc123')
+		const rejected = getResponseInterceptor();
+		const error = { response: { status: 401 } };
 
-    const removeSpy = vi.spyOn(Storage.prototype, 'removeItem')
+		await expect(rejected(error)).rejects.toEqual(error);
+		expect(removeSpy).toHaveBeenCalledWith("authToken");
+	});
 
-    const handlers = api.interceptors.response.handlers
+	test("redirects to /login on 401 response", async () => {
+		localStorage.setItem("authToken", "abc123");
+		const rejected = getResponseInterceptor();
+		const error = { response: { status: 401 } };
 
-    const rejected = handlers.find(
-      h => typeof h.rejected === 'function'
-    )?.rejected
+		try {
+			await rejected(error);
+		} catch (_) {}
 
-    const error = {
-      response: {
-        status: 401
-      }
-    }
+		expect(window.location.href).toBe("/login");
+	});
 
-    await expect(
-      rejected(error)
-    ).rejects.toEqual(error)
+	test("does not remove token on 500 response", async () => {
+		localStorage.setItem("authToken", "abc123");
+		const removeSpy = vi.spyOn(Storage.prototype, "removeItem");
 
-    expect(removeSpy)
-      .toHaveBeenCalledWith('authToken')
-  })
+		const rejected = getResponseInterceptor();
+		const error = { response: { status: 500 } };
 
-  test('does not remove token on non-401 response', async () => {
-    localStorage.setItem('authToken', 'abc123')
+		await expect(rejected(error)).rejects.toEqual(error);
+		expect(removeSpy).not.toHaveBeenCalled();
+	});
 
-    const removeSpy = vi.spyOn(Storage.prototype, 'removeItem')
+	test("does not remove token on 403 response", async () => {
+		localStorage.setItem("authToken", "abc123");
+		const removeSpy = vi.spyOn(Storage.prototype, "removeItem");
 
-    const handlers = api.interceptors.response.handlers
+		const rejected = getResponseInterceptor();
+		const error = { response: { status: 403 } };
 
-    const rejected = handlers.find(
-      h => typeof h.rejected === 'function'
-    )?.rejected
+		await expect(rejected(error)).rejects.toEqual(error);
+		expect(removeSpy).not.toHaveBeenCalled();
+	});
 
-    const error = {
-      response: {
-        status: 500
-      }
-    }
+	test("handles error without response (network error)", async () => {
+		const rejected = getResponseInterceptor();
+		const networkError = new Error("Network Error");
+		// Tidak ada response property
 
-    await expect(
-      rejected(error)
-    ).rejects.toEqual(error)
+		await expect(rejected(networkError)).rejects.toEqual(networkError);
+	});
 
-    expect(removeSpy)
-      .not.toHaveBeenCalled()
-  })
-
-  test('request interceptor returns config object', () => {
-    const handlers = api.interceptors.request.handlers
-
-    const fulfilled = handlers.find(
-      h => typeof h.fulfilled === 'function'
-    )?.fulfilled
-
-    const config = {
-      headers: {}
-    }
-
-    const result = fulfilled(config)
-
-    expect(result).toBeDefined()
-    expect(result.headers).toBeDefined()
-  })
-})
+	test("success interceptor passes response through", () => {
+		const handlers = api.interceptors.response.handlers;
+		const fulfilled = handlers.find(
+			(h) => typeof h.fulfilled === "function",
+		)?.fulfilled;
+		if (fulfilled) {
+			const response = { status: 200, data: { ok: true } };
+			const result = fulfilled(response);
+			expect(result).toEqual(response);
+		}
+	});
+});

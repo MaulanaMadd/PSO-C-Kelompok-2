@@ -1,17 +1,22 @@
-from datetime import datetime, date
+from datetime import date, datetime
+from typing import List, Optional
+
 from pydantic import BaseModel
-from typing import Optional, List
+
 
 class HealthResponse(BaseModel):
     status: str
     db: str
 
+
 class PotlinesResponse(BaseModel):
     potlines: List[int]
+
 
 class PotsResponse(BaseModel):
     potline_id: Optional[int]
     pots: List[int]
+
 
 class LayerLatestRow(BaseModel):
     pot_id: int
@@ -31,7 +36,7 @@ class LayerLatestRow(BaseModel):
     ce: Optional[float] = None
     m: Optional[float] = None
     aef: Optional[float] = None
-    
+
     # New fields for Range Charts
     oa: Optional[float] = None
     osp: Optional[float] = None
@@ -50,7 +55,7 @@ class LayerLatestRow(BaseModel):
     pot_status_code: Optional[int] = None
     transition: Optional[int] = None
     age_month: Optional[int] = None
-    class_: Optional[int] = None # 'class' is a reserved keyword
+    class_: Optional[int] = None  # 'class' is a reserved keyword
     pot_design: Optional[int] = None
     tshift: Optional[int] = None
     ac_schedule: Optional[int] = None
@@ -112,15 +117,18 @@ class LayerLatestRow(BaseModel):
     rod_rj: Optional[int] = None
     fe_charge: Optional[int] = None
 
+
 class LayerLatestResponse(BaseModel):
     potline_id: Optional[int]
     rows: List[LayerLatestRow]
+
 
 class LayerRangeResponse(BaseModel):
     pot_id: int
     start: datetime
     end: datetime
     rows: List[LayerLatestRow]
+
 
 class Log1hRow(BaseModel):
     ts_1h: datetime
@@ -134,10 +142,12 @@ class Log1hRow(BaseModel):
     beam_pos_avg: Optional[float] = None
     feed_pct_avg: Optional[float] = None
 
+
 class Log1hResponse(BaseModel):
     pot_id: int
     days: int
     rows: List[Log1hRow]
+
 
 class DailyLatestRow(BaseModel):
     pot_id: int
@@ -156,7 +166,7 @@ class DailyLatestRow(BaseModel):
     yhat_lo: Optional[float] = None  # Confidence interval lower bound
     yhat_hi: Optional[float] = None  # Confidence interval upper bound
     potday: Optional[str] = None
-    
+
     # New fields for Pot Detail Page
     feed_pct: Optional[float] = None
     oa: Optional[float] = None
@@ -165,23 +175,27 @@ class DailyLatestRow(BaseModel):
     pl_current: Optional[float] = None
     alf3: Optional[float] = None
     caf2: Optional[float] = None
-    
+
     # Logic fields
     psp: Optional[float] = None
     ae_dur: Optional[float] = None
 
+
 class DailyLatestResponse(BaseModel):
     potline_id: Optional[int]
     rows: List[DailyLatestRow]
+
 
 class UserCreate(BaseModel):
     email: str
     password: str
     full_name: str | None = None
 
+
 class UserUpdate(BaseModel):
     full_name: Optional[str] = None
     phone: Optional[str] = None
+
 
 class UserResponse(BaseModel):
     id: int
@@ -190,9 +204,11 @@ class UserResponse(BaseModel):
     phone: str | None = None
     role: str
 
+
 class Token(BaseModel):
     access_token: str
     token_type: str
+
 
 class KPIStandard(BaseModel):
     key: str
@@ -203,11 +219,13 @@ class KPIStandard(BaseModel):
     max_val: Optional[float] = None
     updated_at: Optional[datetime] = None
 
+
 class KPIStandardUpdate(BaseModel):
     key: str
     min_val: Optional[float] = None
     target_val: Optional[float] = None
     max_val: Optional[float] = None
+
 
 class SettingsResponse(BaseModel):
     standards: List[KPIStandard]
