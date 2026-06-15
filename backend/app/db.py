@@ -13,7 +13,6 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 
 # Setup logging
 logging.basicConfig(
-    filename="backend_debug.log",
     level=logging.INFO,
     format="%(asctime)s %(levelname)s:%(message)s",
 )

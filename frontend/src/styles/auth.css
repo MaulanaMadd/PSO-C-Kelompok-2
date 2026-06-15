@@ -413,3 +413,9 @@ body {
 		padding: 3rem 1.5rem;
 	}
 }
+
+/* Hide default eye icon on password inputs (Edge/IE) */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+	display: none;
+}

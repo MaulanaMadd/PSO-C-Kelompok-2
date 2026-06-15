@@ -36,7 +36,7 @@ const LoginPage = () => {
 			{/* Left Panel */}
 			<div className="auth-left">
 				<div className="brand-logo-container">
-					<img src={logo} alt="Inalum Logo" style={{ height: "40px" }} />
+					<img src={logo} alt="Inalum Logo" style={{ height: "64px", filter: "drop-shadow(0 4px 8px rgba(0, 0, 0, 0.8))" }} />
 				</div>
 
 				<div className="content-wrapper">

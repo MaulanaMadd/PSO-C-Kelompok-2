@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useLocation } from "react-router-dom";
 import ChartsSection from "../components/dashboard/ChartsSection";
 import Header from "../components/dashboard/Header";
 import PotGrid from "../components/dashboard/PotGrid";
@@ -7,6 +8,9 @@ import { useDashboardData } from "../hooks/useDashboardData";
 import "../styles/dashboard.css";
 
 const DashboardPage = ({ isDarkMode, toggleTheme }) => {
+	const location = useLocation();
+	const datasetName = location.state?.datasetName;
+
 	const [activeTab, setActiveTab] = useState("Last CE");
 	const [searchQuery, setSearchQuery] = useState("");
 	const [selectedPotline, setSelectedPotline] = useState("ALL POTLINE");
@@ -21,7 +25,7 @@ const DashboardPage = ({ isDarkMode, toggleTheme }) => {
 		downCEData,
 		loading,
 		error,
-	} = useDashboardData(selectedPotline, activeTab);
+	} = useDashboardData(selectedPotline, activeTab, datasetName);
 
 	const filteredPots = pots
 		.filter((pot) => pot.name.toLowerCase().includes(searchQuery.toLowerCase()))

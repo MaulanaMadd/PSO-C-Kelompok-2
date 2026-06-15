@@ -1470,6 +1470,49 @@ const EfficiencyGaugeCard = ({ title, data }) => {
 	);
 };
 
+const CustomTooltip = ({ active, payload, label, color, limit }) => {
+	if (active && payload && payload.length) {
+		return (
+			<div
+				style={{
+					background: "var(--bg-card)",
+					border: "1px solid var(--border-subtle)",
+					padding: "8px 12px",
+					borderRadius: "8px",
+					boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+					fontSize: "12px",
+				}}
+			>
+				<p
+					style={{
+						margin: 0,
+						fontWeight: 600,
+						color: "var(--text-secondary)",
+					}}
+				>
+					{label}
+				</p>
+				<p style={{ margin: "4px 0 0", color: color, fontWeight: 700 }}>
+					Value: {payload[0].value}
+				</p>
+				{limit !== null && (
+					<p
+						style={{
+							margin: "4px 0 0",
+							color: "var(--text-secondary)",
+							borderTop: "1px solid var(--border-subtle)",
+							paddingTop: "4px",
+						}}
+					>
+						Normal Limit: <strong>{limit}</strong>
+					</p>
+				)}
+			</div>
+		);
+	}
+	return null;
+};
+
 const ChartCard = ({
 	title,
 	data,
@@ -1479,49 +1522,6 @@ const ChartCard = ({
 	referenceLines = [],
 	limit = null,
 }) => {
-	// Custom Tooltip Component
-	const CustomTooltip = ({ active, payload, label }) => {
-		if (active && payload && payload.length) {
-			return (
-				<div
-					style={{
-						background: "var(--bg-card)",
-						border: "1px solid var(--border-subtle)",
-						padding: "8px 12px",
-						borderRadius: "8px",
-						boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
-						fontSize: "12px",
-					}}
-				>
-					<p
-						style={{
-							margin: 0,
-							fontWeight: 600,
-							color: "var(--text-secondary)",
-						}}
-					>
-						{label}
-					</p>
-					<p style={{ margin: "4px 0 0", color: color, fontWeight: 700 }}>
-						Value: {payload[0].value}
-					</p>
-					{limit !== null && (
-						<p
-							style={{
-								margin: "4px 0 0",
-								color: "var(--text-secondary)",
-								borderTop: "1px solid var(--border-subtle)",
-								paddingTop: "4px",
-							}}
-						>
-							Normal Limit: <strong>{limit}</strong>
-						</p>
-					)}
-				</div>
-			);
-		}
-		return null;
-	};
 	const gradientId = `color-${title.replace(/\s+/g, "-")}`;
 
 	return (
@@ -1541,7 +1541,7 @@ const ChartCard = ({
 							/>
 							<XAxis dataKey="day" hide />
 							<YAxis hide domain={["auto", "auto"]} />
-							<Tooltip content={<CustomTooltip />} />
+							<Tooltip content={<CustomTooltip color={color} limit={limit} />} />
 							<Line
 								type="linear"
 								dataKey="value"
@@ -1575,7 +1575,7 @@ const ChartCard = ({
 							/>
 							<XAxis dataKey="day" hide />
 							<YAxis hide domain={["auto", "auto"]} />
-							<Tooltip content={<CustomTooltip />} />
+							<Tooltip content={<CustomTooltip color={color} limit={limit} />} />
 							<Area
 								type="linear"
 								dataKey="value"

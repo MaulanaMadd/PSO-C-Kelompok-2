@@ -32,14 +32,18 @@ export const potService = {
 		return response.data;
 	},
 
-	getDailyLatest: async (potlineId) => {
-		const params = potlineId ? { potline_id: potlineId } : {};
+	getDailyLatest: async (potlineId, datasetName) => {
+		const params = {};
+		if (potlineId) params.potline_id = potlineId;
+		if (datasetName) params.source = datasetName;
 		const response = await api.get("/daily/latest", { params });
 		return response.data;
 	},
 
-	getStatsTrend: async (potlineId) => {
-		const params = potlineId ? { potline_id: potlineId } : {};
+	getStatsTrend: async (potlineId, datasetName) => {
+		const params = {};
+		if (potlineId) params.potline_id = potlineId;
+		if (datasetName) params.source = datasetName;
 		const response = await api.get("/stats/trend", { params });
 		return response.data;
 	},

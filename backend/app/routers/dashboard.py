@@ -81,18 +81,20 @@ async def log_1h_range(
 @router.get("/daily/latest", response_model=DailyLatestResponse)
 async def daily_latest(
     potline_id: int | None = Query(default=None),
+    source: str | None = Query(default=None),
     repo: DashboardRepo = Depends(get_dashboard_repo),
 ):
-    rows = await repo.get_daily_latest(potline_id)
+    rows = await repo.get_daily_latest(potline_id, source)
     return {"potline_id": potline_id, "rows": rows}
 
 
 @router.get("/stats/trend")
 async def stats_trend(
     potline_id: int | None = Query(default=None),
+    source: str | None = Query(default=None),
     repo: DashboardRepo = Depends(get_dashboard_repo),
 ):
-    trend_val = await repo.get_ce_trend(potline_id)
+    trend_val = await repo.get_ce_trend(potline_id, source)
     return {"potline_id": potline_id, "avg_ce_trend": trend_val}
 
 

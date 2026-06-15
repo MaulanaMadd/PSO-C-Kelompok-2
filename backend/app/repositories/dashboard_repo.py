@@ -105,7 +105,7 @@ class DashboardRepo(BaseRepo):
         # Log data is deprecated/removed. Return empty list.
         return []
 
-    async def get_daily_latest(self, potline_id: Optional[int]) -> List[Dict[str, Any]]:
+    async def get_daily_latest(self, potline_id: Optional[int], source: Optional[str] = None) -> List[Dict[str, Any]]:
         """
         Optimized query using CTEs and window functions for better performance.
         NOTE: Ensure indexes exist on pot_params_daily(pot_id, date DESC) and ce_predicted_daily(pot_id, pred_date)
@@ -116,6 +116,7 @@ class DashboardRepo(BaseRepo):
             SELECT pot_id, MAX(date) as max_date
             FROM mart.pot_params_daily
             WHERE ($1::int IS NULL OR potline_id = $1)
+            AND ($2::text IS NULL OR source = $2)
             GROUP BY pot_id
         ),
         current_data AS (
@@ -127,6 +128,7 @@ class DashboardRepo(BaseRepo):
                 p.psp, p.ae_dur, p.potday::text
             FROM mart.pot_params_daily p
             INNER JOIN latest_dates ld ON p.pot_id = ld.pot_id AND p.date = ld.max_date
+            WHERE ($2::text IS NULL OR p.source = $2)
         ),
         prev_data AS (
             -- Get previous day CE (for delta calculation)
@@ -135,6 +137,7 @@ class DashboardRepo(BaseRepo):
                 p.ce as prev_ce
             FROM mart.pot_params_daily p
             INNER JOIN latest_dates ld ON p.pot_id = ld.pot_id AND p.date = ld.max_date - INTERVAL '1 day'
+            WHERE ($2::text IS NULL OR p.source = $2)
         ),
         last_valid_ce AS (
             -- Get last known non-zero CE (fallback for pots with CE=0)
@@ -143,6 +146,7 @@ class DashboardRepo(BaseRepo):
             FROM mart.pot_params_daily
             WHERE ce > 0 
               AND ($1::int IS NULL OR potline_id = $1)
+              AND ($2::text IS NULL OR source = $2)
             ORDER BY pot_id, date DESC
         ),
         predictions AS (
@@ -177,10 +181,10 @@ class DashboardRepo(BaseRepo):
         ORDER BY cd.pot_id;
         """
         async with self.pool.acquire() as conn:
-            rows = await conn.fetch(query, potline_id)
+            rows = await conn.fetch(query, potline_id, source)
         return [dict(r) for r in rows]
 
-    async def get_ce_trend(self, potline_id: Optional[int]) -> Dict[str, Any]:
+    async def get_ce_trend(self, potline_id: Optional[int], source: Optional[str] = None) -> Dict[str, Any]:
         """
         Calculates the difference between Today and Yesterday for:
         1. AVG CE (ce_trend)
@@ -193,6 +197,7 @@ class DashboardRepo(BaseRepo):
             SELECT max(date) as max_d 
             FROM mart.pot_params_daily
             WHERE ($1::int IS NULL OR potline_id = $1)
+            AND ($2::text IS NULL OR source = $2)
         ),
         daily_stats AS (
             SELECT 
@@ -203,6 +208,7 @@ class DashboardRepo(BaseRepo):
                 COUNT(CASE WHEN ce < 85 AND ce > 0 THEN 1 END) as cnt_critical
             FROM mart.pot_params_daily
             WHERE ($1::int IS NULL OR potline_id = $1)
+              AND ($2::text IS NULL OR source = $2)
               AND date >= (SELECT max_d - 1 FROM latestpath)
             GROUP BY date
         )
@@ -220,7 +226,7 @@ class DashboardRepo(BaseRepo):
             (SELECT cnt_critical FROM daily_stats WHERE date = (SELECT max_d - 1 FROM latestpath)) as prev_crit
         """
         async with self.pool.acquire() as conn:
-            row = await conn.fetchrow(query, potline_id)
+            row = await conn.fetchrow(query, potline_id, source)
 
         if not row:
             return {

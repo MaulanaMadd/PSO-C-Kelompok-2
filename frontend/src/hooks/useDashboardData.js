@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { potService } from "../services/potService";
 
-export const useDashboardData = (selectedPotline, activeTab = "Last CE") => {
+export const useDashboardData = (selectedPotline, activeTab = "Last CE", datasetName = null) => {
 	const [pots, setPots] = useState([]);
 	const [summaryStats, setSummaryStats] = useState({
 		total: 0,
@@ -30,13 +30,19 @@ export const useDashboardData = (selectedPotline, activeTab = "Last CE") => {
 
 				// Fetch data from backend for specific potline
 				// CHANGED: Use Daily Latest instead of 5m Layer for performance and correctness
-				// Also fetch trend data concurrently
+				// Also fetch trend data concurrently, with fallbacks if no data or backend is down
 				const [data, trendData] = await Promise.all([
-					potService.getDailyLatest(potlineId),
-					potService.getStatsTrend(potlineId),
+					potService.getDailyLatest(potlineId, datasetName).catch((err) => {
+						console.warn("Failed to fetch daily latest, defaulting to empty:", err);
+						return { rows: [] };
+					}),
+					potService.getStatsTrend(potlineId, datasetName).catch((err) => {
+						console.warn("Failed to fetch stats trend, defaulting to empty:", err);
+						return { avg_ce_trend: {} };
+					}),
 				]);
 
-				const rows = data.rows || [];
+				const rows = data?.rows || [];
 				// Unpack the wrapped trend object from backend: { potline_id:..., avg_ce_trend: { ... } }
 				const trendsRaw = trendData?.avg_ce_trend || {};
 
@@ -275,7 +281,7 @@ export const useDashboardData = (selectedPotline, activeTab = "Last CE") => {
 		};
 
 		fetchData();
-	}, [selectedPotline, activeTab]);
+	}, [selectedPotline, activeTab, datasetName]);
 
 	return {
 		pots,

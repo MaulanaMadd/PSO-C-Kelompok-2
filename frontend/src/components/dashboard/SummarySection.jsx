@@ -122,19 +122,21 @@ const Card = ({
 				</div>
 			);
 		} else if (type === "AVERAGE") {
+			const numericValue = parseFloat(value);
 			return (
 				<div
 					style={{
 						display: "flex",
 						flexDirection: "column",
 						alignItems: "flex-end",
-						fontSize: "0.75rem",
+						fontSize: "0.7rem",
 						color: "#94a3b8",
+						whiteSpace: "nowrap"
 					}}
 				>
 					<span>Target: 96.0%</span>
-					<span style={{ color: value >= 96 ? "#22c55e" : "#ef4444" }}>
-						{value >= 96 ? "On Track" : "Below Target"}
+					<span style={{ color: numericValue >= 96 ? "#22c55e" : "#ef4444", fontWeight: "600" }}>
+						{numericValue >= 96 ? "On Track" : "Below Target"}
 					</span>
 				</div>
 			);
@@ -152,15 +154,15 @@ const Card = ({
 					alignItems: "center",
 				}}
 			>
-				<div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-					<Icon size={20} color={iconColor} />
-					<span>{title}</span>
+				<div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "nowrap", overflow: "hidden" }}>
+					<Icon size={18} color={iconColor} style={{ flexShrink: 0 }} />
+					<span style={{ whiteSpace: "nowrap", fontSize: "0.85rem", textOverflow: "ellipsis", overflow: "hidden" }}>{title}</span>
 				</div>
 				{trend !== undefined && trend !== 0 && (
-					<div className={`trend-indicator ${trendClass}`}>
+					<div className={`trend-indicator ${trendClass}`} style={{ whiteSpace: "nowrap", marginLeft: "auto", fontSize: "0.85rem", padding: "2px 6px" }}>
 						{trendSymbol}
 						{trend}
-						{title.includes("AVERAGE") ? "%" : ""}
+						{title.includes("AVG") || title.includes("AVERAGE") ? "%" : ""}
 					</div>
 				)}
 			</div>
@@ -256,7 +258,7 @@ const SummaryCards = ({ data }) => {
 			<Card
 				type="AVERAGE"
 				icon={Activity}
-				title="AVERAGE CE"
+				title="AVG CE"
 				value={`${average.toFixed(1)}%`}
 				subtext="Current Eff."
 				iconColor="#22c55e"

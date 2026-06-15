@@ -9,6 +9,7 @@ import {
 	Settings,
 	Sun,
 	Trash2,
+	Upload,
 	X,
 } from "lucide-react";
 import React from "react";
@@ -100,28 +101,35 @@ const Header = ({
 	};
 
 	const formatDate = (date) => {
-		// If simulatedCurrentDate is provided (from backend data), use its DATE part
-		// Otherwise fallback to simulated date
-		const displayDate = new Date(date);
-
-		if (simulatedCurrentDate) {
-			const sim = new Date(simulatedCurrentDate);
-			displayDate.setFullYear(sim.getFullYear());
-			displayDate.setMonth(sim.getMonth());
-			displayDate.setDate(sim.getDate());
-		} else {
-			// Fallback default simulation: 03 Dec 2025 (only if no data)
-			displayDate.setFullYear(2025);
-			displayDate.setMonth(11); // Dec is 11
-			displayDate.setDate(3);
-		}
-
-		return displayDate.toLocaleDateString("en-GB", {
+		return date.toLocaleDateString("en-GB", {
 			day: "numeric",
 			month: "short",
 			year: "numeric",
 		});
 	};
+
+	const [latestDatasetName, setLatestDatasetName] = React.useState("");
+
+	React.useEffect(() => {
+		const fetchLatestDataset = async () => {
+			if (location.state?.datasetName) {
+				setLatestDatasetName(location.state.datasetName.replace(/\.[^/.]+$/, ""));
+				return;
+			}
+			try {
+				const { default: api } = await import("../../services/api");
+				const res = await api.get("/ingest/history");
+				if (res.data && res.data.length > 0) {
+					// Get the latest filename and remove the extension
+					const name = res.data[0].filename;
+					setLatestDatasetName(name.replace(/\.[^/.]+$/, ""));
+				}
+			} catch (e) {
+				console.error("Failed to fetch latest dataset name", e);
+			}
+		};
+		fetchLatestDataset();
+	}, [location.state]);
 
 	const handlePotlineSelect = (potline) => {
 		if (onPotlineChange) {
@@ -137,16 +145,39 @@ const Header = ({
 				<Link
 					to="/dashboard"
 					className="header-left"
-					style={{ textDecoration: "none", color: "inherit" }}
 				>
-					<img src={logo} alt="Inalum" style={{ height: "32px" }} />
-					<div className="header-brand">
-						<h1>DASHBOARD CURRENT EFFICIENCY ANALYTICS</h1>
-						<span>PT INDONESIA ASAHAN ALUMINIUM</span>
-					</div>
+					<img src="/optina_logo.png" alt="Optina Dashboard" style={{ height: "64px", transform: "scale(2.5) translateY(2px)", transformOrigin: "left center", objectFit: "contain", marginLeft: "-1rem" }} />
 				</Link>
 
 				<div className="header-right">
+					<button
+						onClick={() => navigate("/upload-data")}
+						title="Upload Data"
+						style={{
+							background: "transparent",
+							color: "var(--text-primary)",
+							border: "1px solid var(--border-subtle)",
+							padding: "0.4rem 0.8rem",
+							display: "flex",
+							alignItems: "center",
+							gap: "0.5rem",
+							borderRadius: "8px",
+							fontWeight: 600,
+							fontSize: "0.85rem",
+							cursor: "pointer",
+							marginRight: "0.5rem",
+							transition: "all 0.2s"
+						}}
+						onMouseOver={(e) => {
+							e.currentTarget.style.background = "var(--bg-hover)";
+						}}
+						onMouseOut={(e) => {
+							e.currentTarget.style.background = "transparent";
+						}}
+					>
+						<Upload size={16} /> Upload Data
+					</button>
+
 					<div
 						className={`theme-toggle-switch ${isDarkMode ? "dark" : "light"}`}
 						onClick={toggleTheme}
@@ -288,36 +319,40 @@ const Header = ({
 			{showControls && (
 				<div
 					className={`controls-bar ${isMobileMenuOpen ? "mobile-open" : ""}`}
+					style={{ marginTop: "2rem" }}
 				>
-					<div className="potline-dropdown-container">
+					<div className="potline-dropdown-container" style={{ position: "relative" }}>
+						<span style={{ position: "absolute", bottom: "100%", left: "0", marginBottom: "10px", whiteSpace: "nowrap", fontSize: "0.85rem", fontWeight: "700", color: "var(--text-secondary)", letterSpacing: "0.5px", textTransform: "uppercase" }}>
+							Data Overview{latestDatasetName ? `: ${latestDatasetName}` : ""}
+						</span>
 						<button
 							className={`potline-select ${isDropdownOpen ? "active" : ""}`}
 							onClick={() => setIsDropdownOpen(!isDropdownOpen)}
 						>
-							{selectedPotline || "POTLINE 1"}
-							<ChevronDown
-								size={16}
-								style={{
-									transform: isDropdownOpen ? "rotate(180deg)" : "rotate(0deg)",
-									transition: "transform 0.3s",
-								}}
-							/>
-						</button>
+								{selectedPotline || "POTLINE 1"}
+								<ChevronDown
+									size={16}
+									style={{
+										transform: isDropdownOpen ? "rotate(180deg)" : "rotate(0deg)",
+										transition: "transform 0.3s",
+									}}
+								/>
+							</button>
 
-						{isDropdownOpen && (
-							<div className="potline-menu">
-								{potlines.map((potline) => (
-									<div
-										key={potline}
-										className={`potline-option ${selectedPotline === potline ? "selected" : ""}`}
-										onClick={() => handlePotlineSelect(potline)}
-									>
-										{potline}
-									</div>
-								))}
-							</div>
-						)}
-					</div>
+							{isDropdownOpen && (
+								<div className="potline-menu">
+									{potlines.map((potline) => (
+										<div
+											key={potline}
+											className={`potline-option ${selectedPotline === potline ? "selected" : ""}`}
+											onClick={() => handlePotlineSelect(potline)}
+										>
+											{potline}
+										</div>
+									))}
+								</div>
+							)}
+						</div>
 
 					<div className="search-input-wrapper">
 						<Search size={18} color="#94a3b8" />

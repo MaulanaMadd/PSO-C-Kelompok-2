@@ -27,11 +27,15 @@ const ProfilePage = ({ isDarkMode, toggleTheme }) => {
 	const [formData, setFormData] = useState({});
 
 	// Sync global user to form data when it loads
+	// Helper to safely access user data
+	const displayUser = formData.email ? formData : (globalUser || {});
+
+	// Sync global user to form data when it loads and is not editing
 	useEffect(() => {
-		if (globalUser) {
+		if (globalUser && !isEditing) {
 			setFormData(globalUser);
 		}
-	}, [globalUser]);
+	}, [globalUser, isEditing]);
 
 	const handleInputChange = (e) => {
 		const { name, value } = e.target;
@@ -62,8 +66,7 @@ const ProfilePage = ({ isDarkMode, toggleTheme }) => {
 		setIsEditing(false);
 	};
 
-	// Helper to safely access user data
-	const displayUser = globalUser || {};
+
 
 	return (
 		<div className={`dashboard-container ${isDarkMode ? "dark-mode" : ""}`}>

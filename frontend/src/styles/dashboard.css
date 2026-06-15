@@ -2139,3 +2139,12 @@ body {
 		/* Break to new line */
 	}
 }
+
+/* Fix Recharts focus outline */
+.recharts-wrapper,
+.recharts-surface,
+.recharts-responsive-container,
+.recharts-surface:focus,
+.recharts-wrapper:focus {
+	outline: none !important;
+}

@@ -2,6 +2,9 @@ import os
 import sys
 from pathlib import Path
 
+os.environ["TZ"] = "UTC"
+os.environ["PGTZ"] = "UTC"
+
 from dotenv import load_dotenv
 from sqlalchemy import create_engine, text
 
@@ -68,7 +71,10 @@ with cleaned as (
 ),
 parsed as (
   select
-    tgl_txt::date as date,
+    case
+      when tgl_txt like '%GMT%' then to_timestamp(substring(tgl_txt from 5 for 20), 'Mon DD YYYY HH24:MI:SS')::date
+      else tgl_txt::date
+    end as date,
     case when pot_txt ~ '^\\d+$' then pot_txt::int end as pot_id,
     case
       when pot_txt ~ '^\\d+$' and pot_txt::int between 101 and 285 then 1
@@ -368,7 +374,6 @@ cross join latest_global g;
 commit;
 """
 
-
 def seed_process():
     print("Starting ETL Process...")
 
@@ -402,7 +407,6 @@ def seed_process():
         import traceback
 
         traceback.print_exc()
-
 
 if __name__ == "__main__":
     seed_process()

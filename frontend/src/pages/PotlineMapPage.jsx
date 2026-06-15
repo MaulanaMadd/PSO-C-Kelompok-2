@@ -342,9 +342,9 @@ const PotlineMapPage = ({ isDarkMode, toggleTheme }) => {
 		);
 	};
 
-	const Legend = ({ style = {}, vertical = false }) => {
+	const renderLegend = ({ style = {}, vertical = false }) => {
 		// Micro Label
-		const Label = ({ color, text, subText, width = "35px" }) => (
+		const renderLabel = ({ color, text, subText, width = "35px" }) => (
 			<div
 				style={{
 					display: "flex",
@@ -384,7 +384,7 @@ const PotlineMapPage = ({ isDarkMode, toggleTheme }) => {
 		);
 
 		// Unit Table Helper Components
-		const UnitCell = ({ label, first, last }) => (
+		const renderUnitCell = ({ label, first, last }) => (
 			<div
 				style={{
 					background: label === "ID" ? "#e2e8f0" : "#f0fdf4",
@@ -408,7 +408,7 @@ const PotlineMapPage = ({ isDarkMode, toggleTheme }) => {
 		);
 
 		// Original Horizontal Unit Section (Keep for All Potlines view)
-		const HorizontalUnitSection = () => (
+		const renderHorizontalUnitSection = () => (
 			<div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
 				<div
 					style={{
@@ -457,7 +457,7 @@ const PotlineMapPage = ({ isDarkMode, toggleTheme }) => {
 			</div>
 		);
 
-		const StatusSection = () => (
+		const renderStatusSection = () => (
 			<div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
 				<div
 					style={{
@@ -469,8 +469,8 @@ const PotlineMapPage = ({ isDarkMode, toggleTheme }) => {
 				>
 					STATUS:
 				</div>
-				<Label color="#1e293b" text="OFF" subText="Offline" width="45px" />
-				<Label color="#f0fdf4" text="ON" subText="Normal" width="45px" />
+				{renderLabel({color: "#1e293b", text: "OFF", subText: "Offline", width: "45px"})}
+				{renderLabel({color: "#f0fdf4", text: "ON", subText: "Normal", width: "45px"})}
 			</div>
 		);
 
@@ -503,7 +503,7 @@ const PotlineMapPage = ({ isDarkMode, toggleTheme }) => {
 								justifyContent: "center",
 							}}
 						>
-							<StatusSection />
+							{renderStatusSection()}
 						</div>
 
 						<div
@@ -526,11 +526,11 @@ const PotlineMapPage = ({ isDarkMode, toggleTheme }) => {
 							}}
 						>
 							{/* Row 1: ID */}
-							<UnitCell label="ID" first />
+							{renderUnitCell({label: "ID", first: true})}
 							<div>{/* Spacer */}</div>
 
 							{/* Row 2: CE */}
-							<UnitCell label="CE" last />
+							{renderUnitCell({label: "CE", last: true})}
 							<div
 								style={{
 									display: "flex",
@@ -539,21 +539,21 @@ const PotlineMapPage = ({ isDarkMode, toggleTheme }) => {
 									padding: "2px 0",
 								}}
 							>
-								<Label color="#fca5a5" text="CRIT" subText="<85" width="45px" />
+								{renderLabel({color: "#fca5a5", text: "CRIT", subText: "<85", width: "45px"})}
 								<Label
 									color="#fcd34d"
 									text="WARN"
 									subText="85-90"
 									width="45px"
 								/>
-								<Label color="#86efac" text="OK" subText=">90" width="45px" />
+								{renderLabel({color: "#86efac", text: "OK", subText: ">90", width: "45px"})}
 							</div>
 						</div>
 					</>
 				) : (
 					// HORIZONTAL LAYOUT (Standard)
 					<>
-						<HorizontalUnitSection />
+						{renderHorizontalUnitSection()}
 						<div
 							style={{
 								width: "1px",
@@ -561,7 +561,7 @@ const PotlineMapPage = ({ isDarkMode, toggleTheme }) => {
 								background: "var(--border-subtle)",
 							}}
 						></div>
-						<StatusSection />
+						{renderStatusSection()}
 						<div
 							style={{
 								width: "1px",
@@ -599,7 +599,7 @@ const PotlineMapPage = ({ isDarkMode, toggleTheme }) => {
 										subText="85-90"
 										width="45px"
 									/>
-									<Label color="#86efac" text="OK" subText=">90" width="45px" />
+									{renderLabel({color: "#86efac", text: "OK", subText: ">90", width: "45px"})}
 								</div>
 							</div>
 						</div>
@@ -743,7 +743,7 @@ const PotlineMapPage = ({ isDarkMode, toggleTheme }) => {
 		if (pIndex === 0) baseCurrent = 624;
 		if (pIndex === 2) baseCurrent = 235; // Potline 2 specific
 
-		const randomFluctuation = Math.random() * 2 - 1;
+		const randomFluctuation = ((pIndex * 7) % 3) - 1;
 		const currentKA = baseCurrent + randomFluctuation;
 
 		return {
@@ -811,7 +811,7 @@ const PotlineMapPage = ({ isDarkMode, toggleTheme }) => {
 	];
 
 	// New Charts Component
-	const PotlineCharts = ({ pots }) => {
+	const renderPotlineCharts = ({ pots }) => {
 		// 1. Status Distribution Data
 		const statusCounts = {
 			Optimal: pots.filter((p) => p.ce > 90).length,
@@ -841,7 +841,7 @@ const PotlineMapPage = ({ isDarkMode, toggleTheme }) => {
 			.slice(0, 10)
 			.map((p) => ({ name: `${p.id}`, ce: p.ce }));
 
-		const ChartCard = ({ title, children, scrollable = false }) => (
+		const renderChartCard = ({ title, children, scrollable = false }) => (
 			<div
 				style={{
 					background: isDarkMode ? "#1e293b" : "white",
@@ -893,8 +893,7 @@ const PotlineMapPage = ({ isDarkMode, toggleTheme }) => {
 
 		return (
 			<div style={{ display: "flex", gap: "0.5rem", height: "100%", flex: 1 }}>
-				<ChartCard title="Proporsi Status Pot">
-					<div
+				{renderChartCard({title: "Proporsi Status Pot", children: <><div
 						style={{
 							flex: 1,
 							minHeight: 0,
@@ -966,11 +965,9 @@ const PotlineMapPage = ({ isDarkMode, toggleTheme }) => {
 								</span>
 							</div>
 						))}
-					</div>
-				</ChartCard>
+					</div></>})}
 
-				<ChartCard title="Highest CE (Top 10)" scrollable={true}>
-					<ResponsiveContainer width="100%" height="100%">
+				{renderChartCard({title: "Highest CE (Top 10)", scrollable: true, children: <><ResponsiveContainer width="100%" height="100%">
 						<BarChart
 							data={highestCE}
 							margin={{ top: 15, right: 10, left: -25, bottom: 0 }}
@@ -1007,11 +1004,9 @@ const PotlineMapPage = ({ isDarkMode, toggleTheme }) => {
 								}}
 							/>
 						</BarChart>
-					</ResponsiveContainer>
-				</ChartCard>
+					</ResponsiveContainer></>})}
 
-				<ChartCard title="Lowest CE (Bottom 10)" scrollable={true}>
-					<ResponsiveContainer width="100%" height="100%">
+				{renderChartCard({title: "Lowest CE (Bottom 10)", scrollable: true, children: <><ResponsiveContainer width="100%" height="100%">
 						<BarChart
 							data={lowestCE}
 							margin={{ top: 15, right: 10, left: -25, bottom: 0 }}
@@ -1048,13 +1043,12 @@ const PotlineMapPage = ({ isDarkMode, toggleTheme }) => {
 								}}
 							/>
 						</BarChart>
-					</ResponsiveContainer>
-				</ChartCard>
+					</ResponsiveContainer></>})}
 			</div>
 		);
 	};
 
-	const KPICard = ({ data }) => {
+	const renderKPICard = ({ data }) => {
 		// Dynamic Date Generation matching User Request (30 Jan 2026)
 		const getAppDate = () => {
 			const d = new Date();
@@ -1317,9 +1311,7 @@ const PotlineMapPage = ({ isDarkMode, toggleTheme }) => {
 								boxSizing: "border-box",
 							}}
 						>
-							{kpiStats.map((stat, i) => (
-								<KPICard key={i} data={stat} />
-							))}
+							{kpiStats.map((stat, i) => renderKPICard({ key: i, data: stat }))}
 						</div>
 					)}
 
@@ -1495,7 +1487,7 @@ const PotlineMapPage = ({ isDarkMode, toggleTheme }) => {
 										);
 									})}
 									<div style={{ padding: "0", marginTop: "12px" }}>
-										<Legend />
+										{renderLegend({style: {}, vertical: false})}
 									</div>
 								</>
 							) : (
@@ -1526,19 +1518,15 @@ const PotlineMapPage = ({ isDarkMode, toggleTheme }) => {
 												flexDirection: "column",
 											}}
 										>
-											<KPICard
-												data={
+											{renderKPICard({ data: 
 													kpiStats.find((k) => k.title === selectedPotline) ||
 													kpiStats[0]
-												}
-											/>
+												 })}
 										</div>
 
 										{/* Right: Charts */}
 										<div style={{ flex: 1, display: "flex", minWidth: 0 }}>
-											<PotlineCharts
-												pots={
-													isAllPotlines
+											{renderPotlineCharts({ pots: isAllPotlines
 														? filteredDisplayPots
 														: filteredDisplayPots.filter((p) => {
 																if (selectedPotline === "POTLINE 1")
@@ -1548,9 +1536,7 @@ const PotlineMapPage = ({ isDarkMode, toggleTheme }) => {
 																if (selectedPotline === "POTLINE 3")
 																	return p.id >= 501 && p.id <= 685;
 																return true;
-															})
-												}
-											/>
+															}) })}
 										</div>
 									</div>
 
@@ -1656,7 +1642,7 @@ const PotlineMapPage = ({ isDarkMode, toggleTheme }) => {
 										})}
 										{/* Legend inside Grid for snug fit - Adjusted margin for balance */}
 										<div style={{ gridColumn: "1 / -1", marginTop: "6px" }}>
-											<Legend />
+											{renderLegend({style: {}, vertical: false})}
 										</div>
 									</div>
 								</div>

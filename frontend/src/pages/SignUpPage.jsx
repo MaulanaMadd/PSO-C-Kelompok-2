@@ -5,10 +5,12 @@ import logo from "../assets/inalum_logo.png";
 import "../styles/auth.css";
 
 import { useNavigate } from "react-router-dom";
+import { useUser } from "../context/UserContext";
 import { authService } from "../services/authService";
 
 const SignUpPage = () => {
 	const navigate = useNavigate();
+	const { login } = useUser();
 	const [showPassword, setShowPassword] = useState(false);
 	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -25,6 +27,21 @@ const SignUpPage = () => {
 	// Password validation regex
 	const strongPasswordRegex =
 		/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})/;
+
+	const validatePassword = (pass) => {
+		let score = 0;
+		if (!pass) {
+			setPasswordStrength(0);
+			return;
+		}
+
+		if (pass.length >= 8) score += 1;
+		if (/[A-Z]/.test(pass)) score += 1;
+		if (/[a-z]/.test(pass)) score += 1;
+		if (/[!@#$%^&*0-9]/.test(pass)) score += 1; // Combined special or number for smoother progress
+
+		setPasswordStrength(score);
+	};
 
 	useEffect(() => {
 		validatePassword(formData.password);
@@ -46,20 +63,7 @@ const SignUpPage = () => {
 		}
 	}, [formData.password, formData.confirmPassword]);
 
-	const validatePassword = (pass) => {
-		let score = 0;
-		if (!pass) {
-			setPasswordStrength(0);
-			return;
-		}
 
-		if (pass.length >= 8) score += 1;
-		if (/[A-Z]/.test(pass)) score += 1;
-		if (/[a-z]/.test(pass)) score += 1;
-		if (/[!@#$%^&*0-9]/.test(pass)) score += 1; // Combined special or number for smoother progress
-
-		setPasswordStrength(score);
-	};
 
 	const getStrengthBarClass = (index) => {
 		if (index >= passwordStrength) return "";
@@ -110,7 +114,7 @@ const SignUpPage = () => {
 				});
 
 				// Auto-login after signup
-				await authService.login({
+				await login({
 					email: formData.email,
 					password: formData.password,
 				});
@@ -142,7 +146,7 @@ const SignUpPage = () => {
 			{/* Left Panel - Reused from shared design */}
 			<div className="auth-left">
 				<div className="brand-logo-container">
-					<img src={logo} alt="Inalum Logo" style={{ height: "40px" }} />
+					<img src={logo} alt="Inalum Logo" style={{ height: "64px", filter: "drop-shadow(0 4px 8px rgba(0, 0, 0, 0.8))" }} />
 				</div>
 
 				<div className="content-wrapper">

@@ -2,6 +2,7 @@ import os
 import time
 import uuid
 from datetime import datetime
+import json
 from typing import Dict, List
 
 import joblib
@@ -65,7 +66,7 @@ def log_prediction_run(
                     if len(predictions) > 0
                     else None,
                     "status": status,
-                    "warnings": warnings,
+                    "warnings": json.dumps(warnings) if warnings is not None else None,
                     "error_message": error_message,
                 },
             )
@@ -302,16 +303,16 @@ def run_daily_predictions():
         print("Validating predictions...")
         status, warnings = validate_predictions(predictions)
 
-        if status == "warning":
-            print("⚠️  Warnings detected:")
+        if warnings:
+            print("Warnings detected:")
             for w in warnings:
                 print(f"   - {w}")
         elif status == "error":
-            print("❌ Errors detected:")
+            print("Errors detected:")
             for w in warnings:
                 print(f"   - {w}")
         else:
-            print("✓ Predictions look good")
+            print("Predictions look good")
 
         # 8. Prepare output for database
         print("Preparing predictions for database...")
@@ -434,7 +435,7 @@ def run_daily_predictions():
     except Exception as e:
         execution_time = time.time() - start_time
         error_msg = str(e)
-        print(f"❌ Error during prediction: {error_msg}")
+        print(f"Error during prediction: {error_msg}")
 
         # Log error
         log_prediction_run(

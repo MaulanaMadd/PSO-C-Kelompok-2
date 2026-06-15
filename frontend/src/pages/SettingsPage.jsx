@@ -9,6 +9,7 @@ import {
 	TrendingUp,
 	X,
 	Zap,
+	Upload,
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -25,16 +26,15 @@ const SettingsPage = ({ isDarkMode, toggleTheme }) => {
 	const [formData, setFormData] = useState([]);
 
 	// Transform settings object to array for display when loaded
+	// Transform settings object to array for display when loaded
 	useEffect(() => {
-		if (settings) {
+		if (settings && Object.keys(settings).length > 0 && !isEditing) {
 			const arr = Object.values(settings).sort((a, b) =>
 				a.key.localeCompare(b.key),
 			);
-			// Or sort by specific order if desired, maybe alphabetical or use an order map
-			// For now, let's keep it simple.
 			setFormData(JSON.parse(JSON.stringify(arr))); // Deep copy
 		}
-	}, [settings]);
+	}, [settings, isEditing]);
 
 	const handleParamChange = (key, field, value) => {
 		setFormData((prev) =>
@@ -185,17 +185,19 @@ const SettingsPage = ({ isDarkMode, toggleTheme }) => {
 									</button>
 								</>
 							) : (
-								<button
-									className="nav-btn"
-									onClick={handleEdit}
-									style={{
-										background: "#eff6ff",
-										color: "#3b82f6",
-										borderColor: "#bfdbfe",
-									}}
-								>
-									<Edit2 size={18} /> Edit Configuration
-								</button>
+								<>
+									<button
+										className="nav-btn"
+										onClick={handleEdit}
+										style={{
+											background: "#eff6ff",
+											color: "#3b82f6",
+											borderColor: "#bfdbfe",
+										}}
+									>
+										<Edit2 size={18} /> Edit Configuration
+									</button>
+								</>
 							)}
 						</div>
 					</div>

@@ -1,5 +1,5 @@
-import axios from "axios";
 import React, { createContext, useContext, useEffect, useState } from "react";
+import api from "../services/api";
 
 const SettingsContext = createContext();
 
@@ -7,16 +7,9 @@ export const SettingsProvider = ({ children }) => {
 	const [settings, setSettings] = useState({});
 	const [loading, setLoading] = useState(true);
 
-	const API_URL = "http://localhost:8000/api/v1"; // Or use env var if properly set up in Vite
-
 	const fetchSettings = async () => {
 		try {
-			const token = localStorage.getItem("token");
-			// Allow fetch even if no token? For now assumed protected or public enough for dashboard.
-			// But we can add header if exists.
-			const headers = token ? { Authorization: `Bearer ${token}` } : {};
-
-			const res = await axios.get(`${API_URL}/settings/standards`, { headers });
+			const res = await api.get(`/settings/standards`);
 
 			// Convert list to map
 			const settingsMap = {};
@@ -40,12 +33,7 @@ export const SettingsProvider = ({ children }) => {
 
 	const updateSettings = async (updates) => {
 		try {
-			const token = localStorage.getItem("token");
-			const headers = token ? { Authorization: `Bearer ${token}` } : {};
-
-			const res = await axios.put(`${API_URL}/settings/standards`, updates, {
-				headers,
-			});
+			const res = await api.put(`/settings/standards`, updates);
 
 			// Update local state with the returned updated items
 			const newSettings = { ...settings };

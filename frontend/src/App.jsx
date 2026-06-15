@@ -17,6 +17,7 @@ import PotlineMapPage from "./pages/PotlineMapPage";
 import ProfilePage from "./pages/ProfilePage";
 import SettingsPage from "./pages/SettingsPage";
 import SignUpPage from "./pages/SignUpPage";
+import UploadDataPage from "./pages/Upload data";
 import "./App.css";
 
 function App() {
@@ -97,6 +98,15 @@ function App() {
 								path="/potline-map"
 								element={
 									<PotlineMapPage
+										isDarkMode={isDarkMode}
+										toggleTheme={toggleTheme}
+									/>
+								}
+							/>
+							<Route
+								path="/upload-data"
+								element={
+									<UploadDataPage
 										isDarkMode={isDarkMode}
 										toggleTheme={toggleTheme}
 									/>
