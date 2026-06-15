@@ -115,7 +115,9 @@ async def ingest_pot_daily(
 
     insert_data = []
     for row in payload.rows:
-        row_tuple = tuple(None if row.get(col) == "" else row.get(col) for col in STG_COLUMNS)
+        row_tuple = tuple(
+            None if row.get(col) == "" else row.get(col) for col in STG_COLUMNS
+        )
         insert_data.append(row_tuple)
 
     columns_str = ", ".join(STG_COLUMNS)
@@ -131,33 +133,47 @@ async def ingest_pot_daily(
         async with pool.acquire() as conn:
             # Insert data to staging table
             await conn.executemany(query, insert_data)
-            
+
             # Insert record into upload_history
             user_email = current_user.get("email", "System")
-                
+
             await conn.execute(
                 """
                 INSERT INTO public.upload_history (filename, uploaded_by)
                 VALUES ($1, $2)
                 """,
-                payload.filename, user_email
+                payload.filename,
+                user_email,
             )
 
         # Run ETL process synchronously so data is ready when frontend refreshes
         import subprocess
         import os
         import sys
-        # Run from the backend root directory
-        backend_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-        subprocess.run([sys.executable, "scripts/seed_process.py"], cwd=backend_dir, check=True)
 
-        return {"success": True, "count": len(insert_data), "message": "Data berhasil diunggah dan dianalisis."}
+        # Run from the backend root directory
+        backend_dir = os.path.dirname(
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        )
+        subprocess.run(
+            [sys.executable, "scripts/seed_process.py"], cwd=backend_dir, check=True
+        )
+
+        return {
+            "success": True,
+            "count": len(insert_data),
+            "message": "Data berhasil diunggah dan dianalisis.",
+        }
     except subprocess.CalledProcessError as e:
         logger.error(f"ETL process failed: {e}")
-        raise HTTPException(status_code=500, detail="Upload berhasil ke sistem, namun proses analisis ETL gagal memproses data (mungkin ada format yang salah).")
+        raise HTTPException(
+            status_code=500,
+            detail="Upload berhasil ke sistem, namun proses analisis ETL gagal memproses data (mungkin ada format yang salah).",
+        )
     except Exception as e:
         logger.error(f"Error ingesting pot daily data: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @router.get("/history")
 async def get_upload_history(current_user: dict = Depends(get_current_user)):
@@ -176,8 +192,11 @@ async def get_upload_history(current_user: dict = Depends(get_current_user)):
         logger.error(f"Error fetching upload history: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+
 @router.delete("/history/{history_id}")
-async def delete_upload_history(history_id: int, current_user: dict = Depends(get_current_user)):
+async def delete_upload_history(
+    history_id: int, current_user: dict = Depends(get_current_user)
+):
     try:
         pool = await get_pool()
         async with pool.acquire() as conn:
@@ -187,20 +206,25 @@ async def delete_upload_history(history_id: int, current_user: dict = Depends(ge
             )
             if not record:
                 raise HTTPException(status_code=404, detail="Riwayat tidak ditemukan")
-            
+
             filename = record["filename"]
-            
+
             async with conn.transaction():
                 # Delete from history
-                await conn.execute("DELETE FROM public.upload_history WHERE id = $1", history_id)
+                await conn.execute(
+                    "DELETE FROM public.upload_history WHERE id = $1", history_id
+                )
                 # Delete from mart and raw based on source
-                await conn.execute("DELETE FROM mart.pot_params_daily WHERE source = $1", filename)
-                await conn.execute("DELETE FROM raw.pot_daily WHERE source = $1", filename)
-                
+                await conn.execute(
+                    "DELETE FROM mart.pot_params_daily WHERE source = $1", filename
+                )
+                await conn.execute(
+                    "DELETE FROM raw.pot_daily WHERE source = $1", filename
+                )
+
             return {"success": True, "message": f"Data {filename} berhasil dihapus"}
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Error deleting upload history: {e}")
         raise HTTPException(status_code=500, detail=str(e))
-

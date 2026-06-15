@@ -7,6 +7,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from app.db import get_pool
 
+
 async def create_table():
     pool = await get_pool()
     async with pool.acquire() as conn:
@@ -19,6 +20,7 @@ async def create_table():
             );
         """)
         print("Table public.upload_history created successfully.")
+
 
 if __name__ == "__main__":
     asyncio.run(create_table())

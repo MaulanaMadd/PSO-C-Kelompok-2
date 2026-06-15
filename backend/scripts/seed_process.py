@@ -374,6 +374,7 @@ cross join latest_global g;
 commit;
 """
 
+
 def seed_process():
     print("Starting ETL Process...")
 
@@ -407,6 +408,7 @@ def seed_process():
         import traceback
 
         traceback.print_exc()
+
 
 if __name__ == "__main__":
     seed_process()

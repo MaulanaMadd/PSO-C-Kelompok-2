@@ -22,22 +22,15 @@ vi.mock("../../services/authService", () => ({
 	},
 }));
 
-// SettingsContext menggunakan axios langsung
-vi.mock("axios", () => ({
+// SettingsContext menggunakan api dari services
+vi.mock("../../services/api", () => ({
 	default: {
 		get: vi.fn(() => Promise.resolve({ data: { standards: [] } })),
 		put: vi.fn(() => Promise.resolve({ data: [] })),
-		create: vi.fn(() => ({
-			get: vi.fn(() => Promise.resolve({ data: {} })),
-			interceptors: {
-				request: { use: vi.fn() },
-				response: { use: vi.fn() },
-			},
-		})),
 	},
 }));
 
-import axios from "axios";
+import api from "../../services/api";
 import { SettingsProvider, useSettings } from "../../context/SettingsContext";
 // ─── Import setelah mock ──────────────────────────────────────────────────────
 import { UserProvider, useUser } from "../../context/UserContext";
@@ -174,7 +167,7 @@ describe("UserContext", () => {
 describe("SettingsContext", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
-		axios.get.mockResolvedValue({ data: { standards: [] } });
+		api.get.mockResolvedValue({ data: { standards: [] } });
 	});
 
 	it("renders children without crashing", async () => {
@@ -188,7 +181,7 @@ describe("SettingsContext", () => {
 		expect(screen.getByText("Settings Child")).toBeInTheDocument();
 	});
 
-	it("calls axios on mount to fetch standards", async () => {
+	it("calls api on mount to fetch standards", async () => {
 		await act(async () => {
 			render(
 				<SettingsProvider>
@@ -197,7 +190,7 @@ describe("SettingsContext", () => {
 			);
 		});
 		await waitFor(() => {
-			expect(axios.get).toHaveBeenCalled();
+			expect(api.get).toHaveBeenCalled();
 		});
 	});
 
@@ -225,7 +218,7 @@ describe("SettingsContext", () => {
 	});
 
 	it("handles API error gracefully without crashing", async () => {
-		axios.get.mockRejectedValueOnce(new Error("Network Error"));
+		api.get.mockRejectedValueOnce(new Error("Network Error"));
 		await act(async () => {
 			expect(() =>
 				render(

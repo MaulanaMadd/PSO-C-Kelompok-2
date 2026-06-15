@@ -15,11 +15,13 @@ origins = [o.strip() for o in CORS_ORIGINS.split(",")] if CORS_ORIGINS else ["*"
 
 from contextlib import asynccontextmanager
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup logic
     try:
         from . import db
+
         pool = await db.get_pool()
         async with pool.acquire() as conn:
             try:
@@ -39,11 +41,12 @@ async def lifespan(app: FastAPI):
         print("Database connected successfully")
     except Exception as e:
         print(f"Database startup error: {repr(e)}")
-    
+
     yield
-    
+
     # Shutdown logic
     await close_pool()
+
 
 app = FastAPI(
     title="Optina Dashboard API",

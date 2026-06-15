@@ -105,7 +105,9 @@ class DashboardRepo(BaseRepo):
         # Log data is deprecated/removed. Return empty list.
         return []
 
-    async def get_daily_latest(self, potline_id: Optional[int], source: Optional[str] = None) -> List[Dict[str, Any]]:
+    async def get_daily_latest(
+        self, potline_id: Optional[int], source: Optional[str] = None
+    ) -> List[Dict[str, Any]]:
         """
         Optimized query using CTEs and window functions for better performance.
         NOTE: Ensure indexes exist on pot_params_daily(pot_id, date DESC) and ce_predicted_daily(pot_id, pred_date)
@@ -184,7 +186,9 @@ class DashboardRepo(BaseRepo):
             rows = await conn.fetch(query, potline_id, source)
         return [dict(r) for r in rows]
 
-    async def get_ce_trend(self, potline_id: Optional[int], source: Optional[str] = None) -> Dict[str, Any]:
+    async def get_ce_trend(
+        self, potline_id: Optional[int], source: Optional[str] = None
+    ) -> Dict[str, Any]:
         """
         Calculates the difference between Today and Yesterday for:
         1. AVG CE (ce_trend)
