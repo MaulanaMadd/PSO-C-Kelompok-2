@@ -36,7 +36,7 @@ function buildAutoMapping(xlsxHeaders) {
     const norm = (s) =>
         String(s)
             .toLowerCase()
-            .replace(/[\s\-\.\/\\]/g, '_')   // spaces/dashes/dots → _
+            .replace(/[\s\-./\\]/g, '_')   // spaces/dashes/dots → _
             .replace(/_+/g, '_')              // collapse repeated _
             .replace(/^_|_$/g, '');           // trim leading/trailing _
 

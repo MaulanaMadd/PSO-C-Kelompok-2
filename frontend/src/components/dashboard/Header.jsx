@@ -27,7 +27,6 @@ const Header = ({
 	showControls = true,
 	selectedPotline,
 	onPotlineChange,
-	simulatedCurrentDate,
 }) => {
 	const navigate = useNavigate();
 	const location = useLocation();
@@ -68,27 +67,6 @@ const Header = ({
 		}, 1000);
 		return () => clearInterval(timer);
 	}, []);
-
-	// Fetch notifications
-	const fetchNotifications = async () => {
-		const data = await notificationService.getAll();
-		if (data) setNotifications(data);
-	};
-
-	// React.useEffect(() => {
-	//     fetchNotifications();
-	//     // Poll every 30 seconds
-	//     const interval = setInterval(fetchNotifications, 30000);
-	//     return () => clearInterval(interval);
-	// }, []);
-
-	const markRead = async (id) => {
-		await notificationService.markAsRead(id);
-		// Optimistic update
-		setNotifications((prev) =>
-			prev.map((n) => (n.id === id ? { ...n, is_read: true } : n)),
-		);
-	};
 
 	const formatTime = (date) => {
 		return date.toLocaleTimeString("en-GB", {

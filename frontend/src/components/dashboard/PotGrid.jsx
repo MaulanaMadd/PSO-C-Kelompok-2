@@ -15,7 +15,7 @@ const getStatusIcon = (status) => {
 	return null;
 };
 
-const PotGrid = ({ title, pots, activeTab }) => {
+const PotGrid = ({ pots }) => {
 	const navigate = useNavigate();
 
 	return (

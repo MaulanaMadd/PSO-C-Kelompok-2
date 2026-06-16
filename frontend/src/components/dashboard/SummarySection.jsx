@@ -8,16 +8,14 @@ import {
 import React from "react";
 
 const Card = ({
-	icon: Icon,
+	icon: IconComp,
 	title,
 	value,
 	subtext,
-	colorClass,
 	iconColor,
 	trend,
 	isInverse = false,
 	type,
-	total = 0,
 	extraData = {},
 	categoryAvg = 0,
 }) => {
@@ -155,7 +153,7 @@ const Card = ({
 				}}
 			>
 				<div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "nowrap", overflow: "hidden" }}>
-					<Icon size={18} color={iconColor} style={{ flexShrink: 0 }} />
+					<IconComp size={18} color={iconColor} style={{ flexShrink: 0 }} />
 					<span style={{ whiteSpace: "nowrap", fontSize: "0.85rem", textOverflow: "ellipsis", overflow: "hidden" }}>{title}</span>
 				</div>
 				{trend !== undefined && trend !== 0 && (
