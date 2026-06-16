@@ -666,7 +666,8 @@ const PotDetailPage = ({ isDarkMode, toggleTheme }) => {
 		};
 
 		fetchPotDetails();
-	}, [id, timeRange, settings]);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [id, timeRange, settings, isDarkMode]);
 
 	const formatTime = (date) => {
 		return date.toLocaleTimeString("en-GB", {

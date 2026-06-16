@@ -14,9 +14,7 @@ import {
 } from "lucide-react";
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import logo from "../../assets/inalum_logo.png";
 import { useUser } from "../../context/UserContext";
-import { authService } from "../../services/authService";
 import { notificationService } from "../../services/notificationService";
 
 const Header = ({

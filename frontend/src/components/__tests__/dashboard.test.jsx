@@ -7,7 +7,7 @@
 
 import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 // ─── Isolated pure-UI component tests ─────────────────────────────────────────
 // Semua test di sini menggunakan komponen lokal (bukan import dari file).
