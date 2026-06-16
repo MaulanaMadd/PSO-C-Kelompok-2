@@ -8,7 +8,7 @@ import {
 import React from "react";
 
 const Card = ({
-	icon: IconComp,
+	icon,
 	title,
 	value,
 	subtext,
@@ -19,6 +19,7 @@ const Card = ({
 	extraData = {},
 	categoryAvg = 0,
 }) => {
+	const IconComp = icon;
 	// Determine trend color and icon
 	let trendClass = "trend-neutral";
 	let trendSymbol = "";

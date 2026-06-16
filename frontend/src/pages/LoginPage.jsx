@@ -1,3 +1,4 @@
+
 import { Check, Eye, EyeOff } from "lucide-react";
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -5,7 +6,6 @@ import logo from "../assets/inalum_logo.png";
 import "../styles/auth.css";
 
 import { useUser } from "../context/UserContext";
-import { authService } from "../services/authService";
 
 const LoginPage = () => {
 	const navigate = useNavigate();

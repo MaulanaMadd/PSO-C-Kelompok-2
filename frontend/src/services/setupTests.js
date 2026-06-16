@@ -1,4 +1,3 @@
-import { vi } from "vitest";
 
 Object.defineProperty(window, "location", {
 	writable: true,
@@ -7,7 +6,7 @@ Object.defineProperty(window, "location", {
 	},
 });
 
-global.ResizeObserver = class {
+globalThis.ResizeObserver = class {
 	observe() {}
 	unobserve() {}
 	disconnect() {}

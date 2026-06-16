@@ -347,7 +347,7 @@ function MappingRow({ dbCol, mapping, xlsxHeaders, onMappingChange, required }) 
 // ─────────────────────────────────────────────────────────────────────────────
 // Main Modal
 // ─────────────────────────────────────────────────────────────────────────────
-const UploadDataModal = ({ isOpen, onClose, onUploadSuccess, apiUrl }) => {
+const UploadDataModal = ({ isOpen, onClose, onUploadSuccess }) => {
     const [step, setStep] = useState(0);
     const [file, setFile] = useState(null);
     const [parseError, setParseError] = useState('');

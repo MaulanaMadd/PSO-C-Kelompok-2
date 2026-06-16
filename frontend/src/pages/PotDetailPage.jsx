@@ -49,11 +49,6 @@ const PotDetailPage = ({ isDarkMode, toggleTheme }) => {
 	// Toast State
 	const [toasts, setToasts] = useState([]);
 
-	const addToast = (message, type = "info") => {
-		const id = Date.now();
-		setToasts((prev) => [...prev, { id, message, type }]);
-	};
-
 	const removeToast = (id) => {
 		setToasts((prev) => prev.filter((toast) => toast.id !== id));
 	};
@@ -712,7 +707,6 @@ const PotDetailPage = ({ isDarkMode, toggleTheme }) => {
 	}
 
 	const data = potData; // Alias for render
-	const eff = data.currentEfficiency;
 
 	return (
 		<div className={`dashboard-container ${isDarkMode ? "dark-mode" : ""}`}>

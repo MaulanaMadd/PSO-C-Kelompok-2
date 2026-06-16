@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { authService } from "../services/authService";
 
@@ -23,7 +24,7 @@ export const UserProvider = ({ children }) => {
 					if (payload.sub) {
 						setUser({ full_name: "User", email: payload.sub, role: "User" });
 					}
-				} catch (e) {
+				} catch {
 					setUser(null);
 				}
 			} else {

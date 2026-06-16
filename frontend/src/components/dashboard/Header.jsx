@@ -15,7 +15,6 @@ import {
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useUser } from "../../context/UserContext";
-import { notificationService } from "../../services/notificationService";
 
 const Header = ({
 	activeTab,
@@ -57,7 +56,7 @@ const Header = ({
 
 	const [currentTime, setCurrentTime] = React.useState(new Date());
 
-	const [notifications, setNotifications] = React.useState([]);
+	const [notifications] = React.useState([]);
 	// const [showNotifications, setShowNotifications] = React.useState(false); // Removed dropdown state
 	const unreadCount = notifications.filter((n) => !n.is_read).length;
 

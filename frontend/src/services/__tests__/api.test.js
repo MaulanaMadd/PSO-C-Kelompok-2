@@ -5,7 +5,7 @@
  * Menguji behavior interceptor request/response secara langsung.
  */
 
-import { afterEach, beforeEach, describe, expect, it, test, vi } from "vitest";
+import { beforeEach, describe, expect, it, test, vi } from "vitest";
 import api from "../api";
 
 describe("API Instance", () => {
@@ -95,7 +95,9 @@ describe("API Response Interceptor", () => {
 
 		try {
 			await rejected(error);
-		} catch (_) {}
+		} catch {
+			// Expected to throw
+		}
 
 		expect(window.location.href).toBe("/login");
 	});

@@ -1,5 +1,5 @@
 import { ArrowLeft } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
 	Bar,
@@ -71,13 +71,6 @@ const PotlineMapPage = ({ isDarkMode, toggleTheme }) => {
 	};
 
 	const fullPotList = generateFullPotList();
-
-	const filters = [
-		{ id: "all", label: "All Status" },
-		{ id: "offline", label: "Offline" },
-		{ id: "warning", label: "Warning" },
-		{ id: "critical", label: "Critical" },
-	];
 
 	// Filter based on search query
 	const isSearching = searchQuery.length > 0;
@@ -259,15 +252,6 @@ const PotlineMapPage = ({ isDarkMode, toggleTheme }) => {
 		const status = getStatusColor(type, value);
 		if (status === "status-offline") return "#ffffff"; // White text for dark background
 		return "#1e293b"; // Standard dark text
-	};
-
-	// Helper to get indicator value (1, 0, -1) based on status
-	const getIndicatorValue = (type, value) => {
-		const status = getStatusColor(type, value);
-		if (status === "status-optimal") return 1;
-		if (status === "status-warning") return 0;
-		if (status === "status-critical") return -1;
-		return "-"; // Offline or unknown
 	};
 
 	// Helper to render ultra-compact pot card (Indicator Style - Super Condensed)

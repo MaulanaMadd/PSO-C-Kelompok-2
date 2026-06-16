@@ -57,7 +57,7 @@ const SignUpPage = () => {
 			}));
 		} else {
 			setErrors((prev) => {
-				const { confirmPassword, ...rest } = prev;
+				const { confirmPassword: _confirmPassword, ...rest } = prev;
 				return rest;
 			});
 		}
