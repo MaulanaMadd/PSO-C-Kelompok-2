@@ -34,6 +34,9 @@ Sebelum memulai, pastikan Anda telah menginstal:
 *   [Docker](https://www.docker.com/) (Optional, untuk deployment containerized)
 
 
+# Dokumentasi CI/CD Project
+---
+
 # 🔍 Code Quality
 
 ## Backend Linting
@@ -73,8 +76,6 @@ cd frontend
 
 npm run lint
 ```
-# Dokumentasi CI/CD Project
----
 
 # 🧪 Testing
 
