@@ -100,7 +100,63 @@ Proyek ini menyertakan `docker-compose.yml` untuk kemudahan deployment.
 # Dari root directory
 docker-compose up --build
 ```
+## Code Quality
 
+### Linting
+
+Proyek ini menerapkan proses linting untuk menjaga kualitas dan konsistensi kode.
+
+#### Backend
+- Ruff
+
+#### Frontend
+- ESLint
+- eslint-plugin-react-hooks
+- eslint-plugin-react-refresh
+
+---
+
+## Testing
+
+### Backend Testing
+
+Framework:
+- Pytest
+- Pytest Asyncio
+- Pytest Coverage
+
+Jenis pengujian:
+- Unit Testing
+- API Testing
+- Recommendation Engine Testing
+
+### Frontend Testing
+
+Framework:
+- Vitest
+- React Testing Library
+- Jest DOM
+
+Jenis pengujian:
+- Component Testing
+- Context Testing
+- Page Testing
+- Service Testing
+
+---
+
+## Test Coverage
+
+Coverage pengujian frontend:
+
+| Metric | Coverage |
+|----------|----------|
+| Statements | 83.21% |
+| Branches | 83.45% |
+| Functions | 67.79% |
+| Lines | 83.21% |
+
+Coverage minimum yang ditetapkan pada proyek adalah 60%.
 ---
 **RUN Application :** https://project-optimasi-operasional-reduks-eta.vercel.app/login
 
