@@ -259,6 +259,6 @@ Proyek ini menyertakan `docker-compose.yml` untuk kemudahan deployment.
 # Dari root directory
 docker-compose up --build
 ```
-**RUN Application :** https://project-optimasi-operasional-reduks-eta.vercel.app/login
+**RUN Application :** https://optina-frontend-staging-190501588992.asia-southeast2.run.app/
 
 **Catatan:** Pastikan untuk selalu melakukan sinkronisasi antara model database backend dan schema database lokal Anda.
