@@ -114,8 +114,6 @@ Proyek ini menerapkan proses linting untuk menjaga kualitas dan konsistensi kode
 - eslint-plugin-react-hooks
 - eslint-plugin-react-refresh
 
----
-
 ## Testing
 
 ### Backend Testing
@@ -142,8 +140,6 @@ Jenis pengujian:
 - Context Testing
 - Page Testing
 - Service Testing
-
----
 
 ## Test Coverage
 
