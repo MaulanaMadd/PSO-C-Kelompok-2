@@ -100,50 +100,150 @@ Proyek ini menyertakan `docker-compose.yml` untuk kemudahan deployment.
 # Dari root directory
 docker-compose up --build
 ```
-## Code Quality
+# 🔍 Code Quality
 
-### Linting
+## Backend Linting
 
-Proyek ini menerapkan proses linting untuk menjaga kualitas dan konsistensi kode.
+Tool:
 
-#### Backend
 - Ruff
 
-#### Frontend
+Run linting:
+
+```bash
+cd backend
+
+ruff check .
+```
+
+Auto fix:
+
+```bash
+ruff check . --fix
+```
+
+---
+
+## Frontend Linting
+
+Tools:
+
 - ESLint
 - eslint-plugin-react-hooks
 - eslint-plugin-react-refresh
 
-## Testing
+Run linting:
 
-### Backend Testing
+```bash
+cd frontend
+
+npm run lint
+```
+
+---
+
+# 🧪 Testing
+
+## Backend Testing
 
 Framework:
+
 - Pytest
 - Pytest Asyncio
 - Pytest Coverage
 
-Jenis pengujian:
-- Unit Testing
-- API Testing
-- Recommendation Engine Testing
+### Unit Testing
 
-### Frontend Testing
+Files tested:
+
+```text
+tests/unit/test_auth_core.py
+tests/unit/test_preprocessing.py
+tests/unit/test_recommendation_engine.py
+tests/unit/test_schemas.py
+```
+
+Run test:
+
+```bash
+pytest
+```
+
+Coverage:
+
+```bash
+pytest --cov=app
+```
+
+---
+
+### API Testing
+
+Files tested:
+
+```text
+tests/api/test_auth_api.py
+tests/api/test_notifications_api.py
+```
+
+Purpose:
+
+- Authentication endpoint testing
+- Notification endpoint testing
+- API integration testing
+
+---
+
+## Frontend Testing
 
 Framework:
+
 - Vitest
 - React Testing Library
 - Jest DOM
 
-Jenis pengujian:
-- Component Testing
-- Context Testing
-- Page Testing
-- Service Testing
+### Component Testing
 
-## Test Coverage
+```text
+src/components/__tests__/common.test.jsx
+src/components/__tests__/dashboard.test.jsx
+src/components/common/__tests__/ProtectedRoute.test.jsx
+```
 
-Coverage pengujian frontend:
+### Context Testing
+
+```text
+src/context/__tests__/UserContext.test.jsx
+```
+
+### Page Testing
+
+```text
+src/pages/__tests__/pages.test.jsx
+```
+
+### Service Testing
+
+```text
+src/services/__tests__/api.test.js
+src/services/__tests__/services.test.js
+```
+
+Run tests:
+
+```bash
+npm run test
+```
+
+Generate coverage:
+
+```bash
+npm run coverage
+```
+
+---
+
+# 📊 Test Coverage
 
 | Metric | Coverage |
 |----------|----------|
@@ -152,8 +252,12 @@ Coverage pengujian frontend:
 | Functions | 67.79% |
 | Lines | 83.21% |
 
-Coverage minimum yang ditetapkan pada proyek adalah 60%.
----
+Minimum coverage threshold:
+
+```text
+60%
+```
+
 **RUN Application :** https://project-optimasi-operasional-reduks-eta.vercel.app/login
 
 **Catatan:** Pastikan untuk selalu melakukan sinkronisasi antara model database backend dan schema database lokal Anda.
