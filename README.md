@@ -33,73 +33,7 @@ Sebelum memulai, pastikan Anda telah menginstal:
 *   [PostgreSQL](https://www.postgresql.org/)
 *   [Docker](https://www.docker.com/) (Optional, untuk deployment containerized)
 
-## ⚙️ Instalasi & Menjalankan Aplikasi
 
-### 1. Clone Repository
-
-```bash
-git clone https://github.com/your-repo/PSO-Kelompok2
-cd PSO-Kelompok2
-```
-
-### 2. Backend Setup
-
-Masuk ke direktori backend, buat virtual environment, dan install dependencies.
-
-```bash
-cd backend
-# Buat virtual environment
-python -m venv venv
-
-# Aktifkan virtual environment
-# Windows:
-venv\Scripts\activate
-# macOS/Linux:
-source venv/bin/activate
-
-# Install dependencies
-pip install -r requirements.txt
-```
-
-**Konfigurasi Database:**
-Pastikan PostgreSQL berjalan dan buat database baru. Sesuaikan konfigurasi koneksi di file `.env` (buat file `.env` berdasarkan contoh jika ada, atau set variabel environment secara manual).
-
-**Jalankan Server:**
-
-```bash
-uvicorn app.main:app --reload
-```
-Backend akan berjalan di `http://localhost:8000`.
-
-### 3. Frontend Setup
-
-Buka terminal baru, masuk ke direktori frontend.
-
-```bash
-cd frontend
-
-# Install dependencies
-npm install
-```
-
-**Konfigurasi Environment:**
-Pastikan frontend mengetahui URL backend. Cek file `.env` atau konfigurasi API client.
-
-**Jalankan Development Server:**
-
-```bash
-npm run dev
-```
-Frontend akan berjalan di `http://localhost:5173` (atau port lain yang ditampilkan di terminal).
-
-## 🐳 Menjalankan dengan Docker
-
-Proyek ini menyertakan `docker-compose.yml` untuk kemudahan deployment.
-
-```bash
-# Dari root directory
-docker-compose up --build
-```
 # 🔍 Code Quality
 
 ## Backend Linting
@@ -139,7 +73,7 @@ cd frontend
 
 npm run lint
 ```
-
+# Dokumentasi CI/CD Project
 ---
 
 # 🧪 Testing
@@ -257,7 +191,73 @@ Minimum coverage threshold:
 ```text
 60%
 ```
+## ⚙️ Instalasi & Menjalankan Aplikasi
 
+### 1. Clone Repository
+
+```bash
+git clone https://github.com/your-repo/PSO-Kelompok2
+cd PSO-Kelompok2
+```
+
+### 2. Backend Setup
+
+Masuk ke direktori backend, buat virtual environment, dan install dependencies.
+
+```bash
+cd backend
+# Buat virtual environment
+python -m venv venv
+
+# Aktifkan virtual environment
+# Windows:
+venv\Scripts\activate
+# macOS/Linux:
+source venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
+```
+
+**Konfigurasi Database:**
+Pastikan PostgreSQL berjalan dan buat database baru. Sesuaikan konfigurasi koneksi di file `.env` (buat file `.env` berdasarkan contoh jika ada, atau set variabel environment secara manual).
+
+**Jalankan Server:**
+
+```bash
+uvicorn app.main:app --reload
+```
+Backend akan berjalan di `http://localhost:8000`.
+
+### 3. Frontend Setup
+
+Buka terminal baru, masuk ke direktori frontend.
+
+```bash
+cd frontend
+
+# Install dependencies
+npm install
+```
+
+**Konfigurasi Environment:**
+Pastikan frontend mengetahui URL backend. Cek file `.env` atau konfigurasi API client.
+
+**Jalankan Development Server:**
+
+```bash
+npm run dev
+```
+Frontend akan berjalan di `http://localhost:5173` (atau port lain yang ditampilkan di terminal).
+
+## 🐳 Menjalankan dengan Docker
+
+Proyek ini menyertakan `docker-compose.yml` untuk kemudahan deployment.
+
+```bash
+# Dari root directory
+docker-compose up --build
+```
 **RUN Application :** https://project-optimasi-operasional-reduks-eta.vercel.app/login
 
 **Catatan:** Pastikan untuk selalu melakukan sinkronisasi antara model database backend dan schema database lokal Anda.
