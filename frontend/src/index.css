@@ -1,28 +1,28 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
 
 :root {
-  --primary-color: #3b82f6; /* Adjust to match the specific blue in image */
-  --primary-hover: #2563eb;
-  --text-color: #1f2937;
-  --text-secondary: #6b7280;
-  --bg-color: #f3f4f6;
-  --font-family: 'Inter', sans-serif;
+	--primary-color: #3b82f6; /* Adjust to match the specific blue in image */
+	--primary-hover: #2563eb;
+	--text-color: #1f2937;
+	--text-secondary: #6b7280;
+	--bg-color: #f3f4f6;
+	--font-family: "Inter", sans-serif;
 }
 
 * {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
 }
 
 body {
-  font-family: var(--font-family);
-  background-color: var(--bg-color);
-  color: var(--text-color);
-  min-height: 100vh;
-  -webkit-font-smoothing: antialiased;
+	font-family: var(--font-family);
+	background-color: var(--bg-color);
+	color: var(--text-color);
+	min-height: 100vh;
+	-webkit-font-smoothing: antialiased;
 }
 
 button {
-  font-family: inherit;
+	font-family: inherit;
 }

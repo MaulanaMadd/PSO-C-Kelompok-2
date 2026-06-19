@@ -33,6 +33,165 @@ Sebelum memulai, pastikan Anda telah menginstal:
 *   [PostgreSQL](https://www.postgresql.org/)
 *   [Docker](https://www.docker.com/) (Optional, untuk deployment containerized)
 
+
+# Dokumentasi CI/CD Project
+---
+
+# 🔍 Code Quality
+
+## Backend Linting
+
+Tool:
+
+- Ruff
+
+Run linting:
+
+```bash
+cd backend
+
+ruff check .
+```
+
+Auto fix:
+
+```bash
+ruff check . --fix
+```
+
+---
+
+## Frontend Linting
+
+Tools:
+
+- ESLint
+- eslint-plugin-react-hooks
+- eslint-plugin-react-refresh
+
+Run linting:
+
+```bash
+cd frontend
+
+npm run lint
+```
+
+# 🧪 Testing
+
+## Backend Testing
+
+Framework:
+
+- Pytest
+- Pytest Asyncio
+- Pytest Coverage
+
+### Unit Testing
+
+Files tested:
+
+```text
+tests/unit/test_auth_core.py
+tests/unit/test_preprocessing.py
+tests/unit/test_recommendation_engine.py
+tests/unit/test_schemas.py
+```
+
+Run test:
+
+```bash
+pytest
+```
+
+Coverage:
+
+```bash
+pytest --cov=app
+```
+
+---
+
+### API Testing
+
+Files tested:
+
+```text
+tests/api/test_auth_api.py
+tests/api/test_notifications_api.py
+```
+
+Purpose:
+
+- Authentication endpoint testing
+- Notification endpoint testing
+- API integration testing
+
+---
+
+## Frontend Testing
+
+Framework:
+
+- Vitest
+- React Testing Library
+- Jest DOM
+
+### Component Testing
+
+```text
+src/components/__tests__/common.test.jsx
+src/components/__tests__/dashboard.test.jsx
+src/components/common/__tests__/ProtectedRoute.test.jsx
+```
+
+### Context Testing
+
+```text
+src/context/__tests__/UserContext.test.jsx
+```
+
+### Page Testing
+
+```text
+src/pages/__tests__/pages.test.jsx
+```
+
+### Service Testing
+
+```text
+src/services/__tests__/api.test.js
+src/services/__tests__/services.test.js
+```
+
+Run tests:
+
+```bash
+npm run test
+```
+
+Generate coverage:
+
+```bash
+npm run coverage
+```
+
+---
+
+# 📊 Test Coverage
+
+| Metric | Coverage |
+|----------|----------|
+| Statements | 83.21% |
+| Branches | 83.45% |
+| Functions | 67.79% |
+| Lines | 83.21% |
+
+Minimum coverage threshold:
+
+```text
+60%
+```
 ## ⚙️ Instalasi & Menjalankan Aplikasi
 
 ### 1. Clone Repository
@@ -100,8 +259,6 @@ Proyek ini menyertakan `docker-compose.yml` untuk kemudahan deployment.
 # Dari root directory
 docker-compose up --build
 ```
-
----
-**RUN Application :** https://project-optimasi-operasional-reduks-eta.vercel.app/login
+**RUN Application :** https://optina-frontend-staging-190501588992.asia-southeast2.run.app/
 
 **Catatan:** Pastikan untuk selalu melakukan sinkronisasi antara model database backend dan schema database lokal Anda.

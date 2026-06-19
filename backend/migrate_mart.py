@@ -1,7 +1,6 @@
-
 import asyncio
+
 import asyncpg
-import os
 
 # Use the specific URL we found earlier
 DATABASE_URL = "postgresql://postgres:IXPjRinFrYRaNIrjRGrkDVSxjaQpEZcV@trolley.proxy.rlwy.net:34796/railway"
@@ -32,15 +31,19 @@ WHERE pot_id IS NOT NULL;
 COMMIT;
 """
 
+
 async def run_migration():
     print("Starting migration...")
     try:
         conn = await asyncpg.connect(DATABASE_URL)
         await conn.execute(MIGRATION_SQL)
-        print("Migration successful: mart.pot_params_daily synchronized with raw.pot_daily")
+        print(
+            "Migration successful: mart.pot_params_daily synchronized with raw.pot_daily"
+        )
         await conn.close()
     except Exception as e:
         print(f"Migration failed: {e}")
+
 
 if __name__ == "__main__":
     asyncio.run(run_migration())
