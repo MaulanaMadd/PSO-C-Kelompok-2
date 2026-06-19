@@ -1,3 +1,5 @@
 trigger deploy frontend
 
-trigger 111111
+trigger 1
+
+trigger
